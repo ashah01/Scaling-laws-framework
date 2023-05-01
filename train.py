@@ -86,6 +86,7 @@ optimizer = optim.Adam(net.parameters(), lr=args.lr)
 prev_avg_loss = float("inf")
 avg_test_loss = float("inf") # scoping
 while True:
+    # train_scores = []
     for data in tqdm(trainloader):
         inputs, labels = data
 
@@ -93,6 +94,7 @@ while True:
 
         outputs = net(inputs)
         loss = criterion(outputs, labels)
+        # train_scores.append(loss.item())
         loss.backward()
         optimizer.step()
     
@@ -111,6 +113,10 @@ while True:
         prev_avg_loss = avg_test_loss
         continue
     else:
+        # plt.plot(train_scores[-313:], label="train")
+        # plt.plot(test_scores, label="test")
+        # plt.legend()
+        # plt.savefig("capacity.png")
         break
 
 
