@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define hyperparameter values to search over
-embedding_dims=(15 20)
-depths=(2 3 4 5)
+embedding_dims=(30)
+depths=(2 3 4)
 
 # Loop over all possible combinations of hyperparameter values
 
