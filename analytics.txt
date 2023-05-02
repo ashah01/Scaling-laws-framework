@@ -1,6 +1,6 @@
 lr: 0.0003, hidden dim: 10, depth: 2, params: 117570, dropout1: 0.1, dropout2: 0.1, loss:0.0536032744741254
 lr: 0.0003, hidden dim: 10, depth: 3, params: 102790, dropout1: 0.1, dropout2: 0.1, loss: 0.046778395210755226
-lr: 0.0003, hidden dim: 10, depth: 4, params: 89610, dropout1: 0.1, dropout2: 0.1, loss: 0.05261247719947871
+lr: 0.00008, hidden dim: 10, depth: 4, params: 89610, dropout1: 0.1, dropout2: 0.1, loss: 0.04952988966713386
 lr: 0.0003, hidden dim: 10, depth: 5, params: 78030, dropout1: 0.1, dropout2: 0.1, loss: 0.03875746892290205
 lr: 0.0003, hidden dim: 15, depth: 2, params: 264100, dropout1: 0.1, dropout2: 0.1, loss: 0.04626810921149264
 lr: 0.0003, hidden dim: 15, depth: 3, params: 230830, dropout1: 0.1, dropout2: 0.1, loss: 0.03925085568680108
