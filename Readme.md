@@ -18,4 +18,18 @@ The model and training loop has been constructed, and nuisance hyperparameter va
 - [x] Plot embed dim and depth versus loss
 - [x] Read the Greg Yang paper on scaling laws, might have some good insights about tuning the scaling laws framework above
 - [ ] Gather more data points. Optimize nuisance hyperparameters (visualizing train vs test might be helpful for determining dropout)
+  - [ ] Resolve irregularities / ensure correctness. Identify and resolve abnormalities in performance curves.
 - [ ] Extrapolate law
+
+
+### Why isn't depth 5 width 30 better than its shallower, slimmer counterparts?
+
+![image](depth5width30lr8e5.png)
+
+The performance curve seems to have immense deviation. The average loss reported is dramatically larger than those part of the lowest bound. It might be helpful to examine other learning rates and other batch sizes to determine what the variance is looking like, and see if another hyperparameter configuration is more well-suited.
+
+Variance of test losses on batch size 64 is 0.0020
+Variance of test losses on batch size 32 is 0.0043
+Variance of test losses on batch size 32, lr 3e-4 is 0.0045 (has best performance)
+
+It would seem the heuristic of smooth optimization surfaces doesn't really hold here. Smaller batch sizes with a larger learning rate are optimal. 
