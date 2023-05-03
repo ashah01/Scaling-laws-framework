@@ -32,4 +32,4 @@ Variance of test losses on batch size 64 is 0.0020
 Variance of test losses on batch size 32 is 0.0043
 Variance of test losses on batch size 32, lr 3e-4 is 0.0045 (has best performance)
 
-It would seem the heuristic of smooth optimization surfaces doesn't really hold here. Smaller batch sizes with a larger learning rate are optimal. 
+It would seem the heuristic of loss improvements with smooth optimization surfaces doesn't really hold here. Smaller batch sizes with a larger learning rate are optimal at this size. 
