@@ -14,3 +14,7 @@ lr: 0.00008, hidden dim: 30, depth: 2, params: 1054690, dropout1: 0.1, dropout2:
 lr: 0.0003, hidden dim: 30, depth: 3, params: 921550, dropout1: 0.1, dropout2: 0.1, loss: 0.03379413265937243
 lr: 0.0003, hidden dim: 30, depth: 4, params: 802810, dropout1: 0.1, dropout2: 0.1, loss: 0.027252343693728615
 lr: 0.0003, hidden dim: 30, depth: 5, params: 698470, dropout1: 0.1, dropout2: 0.1, loss: 0.030927269600365303
+
+lr: 0.0003, hidden dim: 40, depth: 5, params: 1240890, dropout1: 0.1, dropout2: 0.1, loss: 0.03388940892981658
+lr: 3e-05, hidden dim: 40, depth: 5, params: 1240890, dropout1: 0.1, dropout2: 0.1, loss: 0.04353135926184289
+lr: 0.0001, hidden dim: 40, depth: 5, params: 1240890, dropout1: 0.2, dropout2: 0.1, loss: 0.03477042709381036

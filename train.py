@@ -86,7 +86,7 @@ optimizer = optim.Adam(net.parameters(), lr=args.lr)
 prev_avg_loss = float("inf")
 avg_test_loss = float("inf") # scoping
 while True:
-    # train_scores = []
+    train_scores = []
     for data in tqdm(trainloader):
         inputs, labels = data
 
@@ -94,7 +94,7 @@ while True:
 
         outputs = net(inputs)
         loss = criterion(outputs, labels)
-        # train_scores.append(loss.item())
+        train_scores.append(loss.item())
         loss.backward()
         optimizer.step()
     
@@ -113,6 +113,7 @@ while True:
         prev_avg_loss = avg_test_loss
         continue
     else:
+        import IPython; IPython.embed()
         # plt.plot(train_scores[-313:], label="train")
         # plt.plot(test_scores, label="test")
         # plt.legend()
@@ -121,5 +122,5 @@ while True:
 
 
 with open("analytics.txt", "a") as f:
-    f.write(f"lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout1: {args.dropout1}, dropout2: {args.dropout2}, loss: {prev_avg_loss}\n")
+    f.write(f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout1: {args.dropout1}, dropout2: {args.dropout2}, loss: {prev_avg_loss}\n")
     f.close()
