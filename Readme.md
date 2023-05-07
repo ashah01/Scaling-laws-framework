@@ -25,3 +25,11 @@ The model and training loop has been constructed, and nuisance hyperparameter va
 ### Getting more data points
 
 Before the final step of extrapolating the functional forms, we need to collect more data points. This involves simply adjusting the width and depth. Unfortunately, each varying size brings its own fair share of challenges. Increased capacity results in new optima for regularization, more complex optimization landscapes results in new optima for learning rates, etc. That's to say, **we need better methods for tuning nuisance hyperparameters to milk peformance at every shape.** If we can do this, we'll know that the data points collected are grounded in truth.
+
+![Namespace(batch_size=64, lr=0.0003, hidden_dim=40, depth=5, dropout1=0.1, dropout2=0.1)](bsz64h40d5.png)
+Does this mean that the model has reached its lowest possible train loss?
+
+## Insights thus far
+- Batch size seems to perform better at 64
+- Dropout should be tuned very carefully. 0.15 > 0.1 > 0.2
+- Smaller batches benefit from smaller learning rates

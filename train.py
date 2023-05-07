@@ -8,6 +8,8 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import os
 import argparse
+import math
+import pickle
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--batch_size", type=int, default=32)
@@ -77,7 +79,6 @@ class Net(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
-
 net = Net(args.hidden_dim, args.depth, args.dropout1, args.dropout2)
 
 criterion = nn.CrossEntropyLoss()
@@ -85,8 +86,11 @@ optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
 prev_avg_loss = float("inf")
 avg_test_loss = float("inf") # scoping
+train_scores = []
+test_scores = []
+num_test_batches = math.ceil(10000 / args.batch_size)
+
 while True:
-    train_scores = []
     for data in tqdm(trainloader):
         inputs, labels = data
 
@@ -98,7 +102,7 @@ while True:
         loss.backward()
         optimizer.step()
     
-    test_scores = []
+    
     with torch.no_grad():
         for data in testloader:
             images, labels = data
@@ -106,18 +110,19 @@ while True:
             l_test = criterion(outputs, labels)
             test_scores.append(l_test.item())
     
-    avg_test_loss = sum(test_scores) / len(test_scores)
+    avg_test_loss = sum(test_scores[-num_test_batches:]) / len(test_scores[-num_test_batches:])
     print(avg_test_loss)
 
     if avg_test_loss < prev_avg_loss:
         prev_avg_loss = avg_test_loss
         continue
     else:
-        import IPython; IPython.embed()
-        # plt.plot(train_scores[-313:], label="train")
-        # plt.plot(test_scores, label="test")
-        # plt.legend()
-        # plt.savefig("capacity.png")
+        with open(f"observations/train_scores_b64lr3e4d{args.depth}w{args.hidden_dim}", "wb") as f:
+            pickle.dump(train_scores, f)
+            f.close()
+        with open(f"observations/test_scores_b64lr3e4d{args.depth}w{args.hidden_dim}", "wb") as f:
+            pickle.dump(test_scores, f)
+            f.close()
         break
 
 
