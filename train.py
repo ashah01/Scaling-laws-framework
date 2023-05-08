@@ -5,21 +5,11 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.optim as optim
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-import os
-import argparse
 import math
 import pickle
+from argparse import Namespace
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--batch_size", type=int, default=32)
-parser.add_argument("--lr", type=float, default=3e-4)
-parser.add_argument("--hidden_dim", type=int, default=32)
-parser.add_argument("--depth", type=int, default=2)
-parser.add_argument("--dropout1", type=float, default=0.25)
-parser.add_argument("--dropout2", type=float, default=0.5)
-args = parser.parse_args()
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3801,))]
@@ -31,9 +21,6 @@ trainset = torchvision.datasets.MNIST(
 testset = torchvision.datasets.MNIST(
     root="./data", train=False, download=True, transform=transform
 )
-
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True)
-testloader = torch.utils.data.DataLoader(testset, batch_size=args.batch_size, shuffle=False)
 
 def init_params(m):
     if isinstance(m, nn.Conv2d):
@@ -79,53 +66,74 @@ class Net(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
-net = Net(args.hidden_dim, args.depth, args.dropout1, args.dropout2)
+def train(args):
 
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(net.parameters(), lr=args.lr)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=args.batch_size, shuffle=False)
 
-prev_avg_loss = float("inf")
-avg_test_loss = float("inf") # scoping
-train_scores = []
-test_scores = []
-num_test_batches = math.ceil(10000 / args.batch_size)
+    net = Net(args.hidden_dim, args.depth, args.dropout1, args.dropout2)
+    net = net.to(device)
 
-while True:
-    for data in tqdm(trainloader):
-        inputs, labels = data
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
-        optimizer.zero_grad()
+    prev_avg_loss = float("inf")
+    avg_test_loss = float("inf") # scoping
+    train_scores = []
+    test_scores = []
+    num_test_batches = math.ceil(10000 / args.batch_size)
 
-        outputs = net(inputs)
-        loss = criterion(outputs, labels)
-        train_scores.append(loss.item())
-        loss.backward()
-        optimizer.step()
-    
-    
-    with torch.no_grad():
-        for data in testloader:
-            images, labels = data
-            outputs = net(images)
-            l_test = criterion(outputs, labels)
-            test_scores.append(l_test.item())
-    
-    avg_test_loss = sum(test_scores[-num_test_batches:]) / len(test_scores[-num_test_batches:])
-    print(avg_test_loss)
+    while True:
+        for data in tqdm(trainloader):
+            inputs, labels = data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
 
-    if avg_test_loss < prev_avg_loss:
-        prev_avg_loss = avg_test_loss
-        continue
-    else:
-        with open(f"observations/train_scores_b64lr3e4d{args.depth}w{args.hidden_dim}", "wb") as f:
-            pickle.dump(train_scores, f)
-            f.close()
-        with open(f"observations/test_scores_b64lr3e4d{args.depth}w{args.hidden_dim}", "wb") as f:
-            pickle.dump(test_scores, f)
-            f.close()
-        break
+            optimizer.zero_grad()
+
+            outputs = net(inputs)
+            loss = criterion(outputs, labels)
+            train_scores.append(loss.item())
+            loss.backward()
+            optimizer.step()
+        
+        
+        with torch.no_grad():
+            for data in testloader:
+                images, labels = data
+                images = images.to(device)
+                labels = labels.to(device)
+                outputs = net(images)
+                l_test = criterion(outputs, labels)
+                test_scores.append(l_test.item())
+        
+        avg_test_loss = sum(test_scores[-num_test_batches:]) / len(test_scores[-num_test_batches:])
+        print(avg_test_loss)
+
+        if avg_test_loss < prev_avg_loss:
+            prev_avg_loss = avg_test_loss
+            continue
+        else:
+            print(prev_avg_loss)
+            with open(f"observations/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}", "wb") as f:
+                pickle.dump(train_scores, f)
+                f.close()
+            with open(f"observations/test_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}", "wb") as f:
+                pickle.dump(test_scores, f)
+                f.close()
+            break
 
 
-with open("analytics.txt", "a") as f:
-    f.write(f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout1: {args.dropout1}, dropout2: {args.dropout2}, loss: {prev_avg_loss}\n")
-    f.close()
+    with open("observations/analytics.txt", "a") as f:
+        f.write(f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout1: {args.dropout1}, dropout2: {args.dropout2}, loss: {prev_avg_loss}\n")
+        f.close()
+
+#args = Namespace(batch_size=32, lr=3e-4, hidden_dim=64, depth=2, dropout1=0.2, dropout2=0.1)
+
+for bsz in [32, 64, 100]:
+    for l in [3e-4, 1e-4, 8e-5, 5e-5]:
+        for width in [64, 128, 256]:
+            for d in [2, 3, 4, 5]:
+                for d1 in [0.15, 0.2, 0.25, 0.3]:
+                    for d2 in [0.1, 0.15]: # [0.1, 0.15, 0.2]
+                        train(Namespace(batch_size=bsz, lr=l, hidden_dim=width, depth=d, dropout1=d1, dropout2=d2))

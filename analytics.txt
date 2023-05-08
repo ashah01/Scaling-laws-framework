@@ -8,13 +8,13 @@ lr: 0.0003, hidden dim: 15, depth: 4, params: 201160, dropout1: 0.1, dropout2: 0
 lr: 0.00008, hidden dim: 15, depth: 5, params: 175090, dropout1: 0.1, dropout2: 0.1, loss: 0.039489930016487505
 lr: 0.0003, hidden dim: 20, depth: 2, params: 469130, dropout1: 0.1, dropout2: 0.1, loss: 0.042288553581234886
 lr: 0.0003, hidden dim: 20, depth: 3, params: 409970, dropout1: 0.1, dropout2: 0.1, loss: 0.031965097443540924
-lr: 0.0003, hidden dim: 20, depth: 4, params: 357210, dropout1: 0.1, dropout2: 0.1, loss: 0.03759824177390787
-lr: 0.0003, hidden dim: 20, depth: 5, params: 310850, dropout1: 0.1, dropout2: 0.1, loss: 0.028637632520025734
+lr: 0.0002, hidden dim: 20, depth: 4, params: 357210, dropout1: 0.1, dropout2: 0.1, loss: 0.03159622660083338
+lr: 0.0003, hidden dim: 20, depth: 5, params: 310850, dropout1: 0.1, dropout2: 0.1, loss: loss: 0.03077659726772364 <-- lucky seed?
 lr: 0.00008, hidden dim: 30, depth: 2, params: 1054690, dropout1: 0.1, dropout2: 0.1, loss: 0.03658165191538251
 lr: 0.0003, hidden dim: 30, depth: 3, params: 921550, dropout1: 0.1, dropout2: 0.1, loss: 0.03379413265937243
-lr: 0.0003, hidden dim: 30, depth: 4, params: 802810, dropout1: 0.1, dropout2: 0.1, loss: 0.027252343693728615
-lr: 0.0003, hidden dim: 30, depth: 5, params: 698470, dropout1: 0.1, dropout2: 0.1, loss: 0.030927269600365303
+lr: 0.0001, hidden dim: 30, depth: 4, params: 802810, dropout1: 0.1, dropout2: 0.1, loss: 0.029652165857621596 <-- This is with bsz thirty two
+lr: 0.0001, hidden dim: 30, depth: 5, params: 698470, dropout1: 0.1, dropout2: 0.1, loss: 0.027278735914987105
 lr: 0.0003, hidden dim: 40, depth: 2, params: 1874250, dropout1: 0.15, dropout2: 0.1, loss: 0.04203684613337387
 lr: 0.0003, hidden dim: 40, depth: 3, params: 1637530, dropout1: 0.15, dropout2: 0.1, loss: 0.03571994206371076
-lr: 0.0003, hidden dim: 40, depth: 4, params: 1426410, dropout1: 0.15, dropout2: 0.1, loss: 0.034892147695471436
+lr: 0.0001, hidden dim: 40, depth: 4, params: 1426410, dropout1: 0.15, dropout2: 0.1, loss: 0.028074165000558933
 lr: 0.0003, hidden dim: 40, depth: 5, params: 1240890, dropout1: 0.15, dropout2: 0.1, loss: 0.027725637844703634
