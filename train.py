@@ -94,6 +94,7 @@ def train(args):
                 test_scores.append(l_test.item())
         
         avg_test_loss = sum(test_scores[-num_test_batches:]) / len(test_scores[-num_test_batches:])
+        print(avg_test_loss)
 
         if avg_test_loss < prev_avg_loss:
             prev_avg_loss = avg_test_loss
@@ -114,9 +115,8 @@ def train(args):
 
 # TODO: build smarter HP configuration generation
 
-for bsz in [32, 64, 100]:
-    for l in [3e-4, 1e-4, 8e-5, 5e-5]:
-        for width in [64, 128, 256]:
-            for de in [2, 3, 4, 5]:
-                for dr in [0.1, 0.15, 0.2, 0.25]:
-                    train(Namespace(batch_size=bsz, lr=l, hidden_dim=width, depth=de, dropout=dr))
+
+for width in [64, 128]:
+    for de in [1, 2, 3, 4, 5]:
+        for dr in [0.05]:
+            train(Namespace(batch_size=32, lr=3e-4, hidden_dim=width, depth=de, dropout=dr))
