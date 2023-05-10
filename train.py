@@ -21,6 +21,7 @@ testset = torchvision.datasets.MNIST(
     root="./data", train=False, download=True, transform=transform
 )
 
+
 def init_params(m):
     if isinstance(m, nn.Conv2d):
         nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
@@ -31,32 +32,38 @@ def init_params(m):
         if m.bias is not None:
             nn.init.constant_(m.bias, 0)
 
+
 class MLP(nn.Module):
     def __init__(self, embedding_dim, num_layers, dropout_rate=0.1):
         super().__init__()
-        
+
         # Input layer
-        self.layers = nn.ModuleList([nn.Flatten(),
-                                     nn.Linear(784, embedding_dim)])
-        
+        self.layers = nn.ModuleList([nn.Flatten(), nn.Linear(784, embedding_dim)])
+
         # Hidden layers
         for i in range(num_layers - 1):
             self.layers.append(nn.Linear(embedding_dim, embedding_dim))
             self.layers.append(nn.ReLU())
             self.layers.append(nn.Dropout(p=dropout_rate))
-        
+
         # Output layer with softmax activation
         self.layers.append(nn.Linear(embedding_dim, 10))
-        
+
+        self.apply(init_params)
+
     def forward(self, x):
         for layer in self.layers:
             x = layer(x)
         return x
-    
-def train(args):
 
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=args.batch_size, shuffle=False)
+
+def train(args):
+    trainloader = torch.utils.data.DataLoader(
+        trainset, batch_size=args.batch_size, shuffle=True
+    )
+    testloader = torch.utils.data.DataLoader(
+        testset, batch_size=args.batch_size, shuffle=False
+    )
 
     net = MLP(args.hidden_dim, args.depth, args.dropout)
     net = net.to(device)
@@ -82,8 +89,7 @@ def train(args):
             train_scores.append(loss.item())
             loss.backward()
             optimizer.step()
-        
-        
+
         with torch.no_grad():
             for data in testloader:
                 images, labels = data
@@ -92,31 +98,48 @@ def train(args):
                 outputs = net(images)
                 l_test = criterion(outputs, labels)
                 test_scores.append(l_test.item())
-        
-        avg_test_loss = sum(test_scores[-num_test_batches:]) / len(test_scores[-num_test_batches:])
+
+        avg_test_loss = sum(test_scores[-num_test_batches:]) / len(
+            test_scores[-num_test_batches:]
+        )
         print(avg_test_loss)
 
         if avg_test_loss < prev_avg_loss:
             prev_avg_loss = avg_test_loss
             continue
         else:
-            with open(f"observations/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}", "wb") as f:
-                pickle.dump(train_scores, f)
-                f.close()
-            with open(f"observations/test_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}", "wb") as f:
-                pickle.dump(test_scores, f)
-                f.close()
+            if args.save:
+                with open(
+                    f"observations/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+                    "wb",
+                ) as f:
+                    pickle.dump(train_scores, f)
+                    f.close()
+                with open(
+                    f"observations/test_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+                    "wb",
+                ) as f:
+                    pickle.dump(test_scores, f)
+                    f.close()
             break
 
-
     with open("observations/analytics.txt", "a") as f:
-        f.write(f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {prev_avg_loss}\n")
+        f.write(
+            f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {prev_avg_loss}\n"
+        )
         f.close()
+
 
 # TODO: build smarter HP configuration generation
 
-
-for width in [64, 128]:
-    for de in [1, 2, 3, 4, 5]:
-        for dr in [0.05]:
-            train(Namespace(batch_size=32, lr=3e-4, hidden_dim=width, depth=de, dropout=dr))
+save = False
+for width in [32, 64, 128]: # 32, 64, 128
+    for de in [1, 2, 3, 4]:
+        for dr in [0.05, 0.1]:
+            for l in [3e-4, 1e-4, 5e-4]:
+                for bsz in [32]:
+                    train(
+                        Namespace(
+                            batch_size=bsz, lr=l, hidden_dim=width, depth=de, dropout=dr, save=save
+                        )
+                    )

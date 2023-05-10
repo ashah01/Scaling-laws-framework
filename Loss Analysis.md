@@ -1,0 +1,1 @@
+Even after doing a shallow optimization over the nuisance hyperparameters, all architectures yield worse loss as they scale past 2 layers. This must be resolved to ensure validity to the heuristic observed on smaller scale for the development of an effective search space as we scale width and depth.
