@@ -4,7 +4,7 @@ This repository serves as an opportunity for me to learn about how best to condu
 
 Scaling laws fundamentally consists of chaning the depth and width of a model, plotting its best loss and then observing a funcitonal form relating the variables. The challenging part - the polish that separates professionals from amateurs - is ensuring the loss obtained truly is the *best* loss. This requires the tuning of nuisance hyperparameters - components not directly being studied but that behave differently as the components in study are.
 
-My current implementation for this is the dumbest of the possible methods. I use grid search, which attempts every combination within a range of values. This is suboptimal because in order to find HP optima, all possible combinations need to be exhaustively tested. The key metric then for nuisance HP tuning is speed; how long does it take for this particular tuning strategy to find optima?
+My current implementation for this is the dumbest of the possible methods. I use grid search, which attempts every combination within a range of values. This is suboptimal because in order to find HP optima, all possible combinations need to be exhaustively tested. The key metric for nuisance HP tuning is thus speed; how long does it take for this particular tuning strategy to find optima?
 
 More is discussed about methods to achieve this in [[Loss Analysis]]
 

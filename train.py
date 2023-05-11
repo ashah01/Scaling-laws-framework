@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 import torch.optim as optim
@@ -7,6 +8,8 @@ from tqdm import tqdm
 import math
 import pickle
 from argparse import Namespace
+
+torch.manual_seed(3407)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -23,12 +26,8 @@ testset = torchvision.datasets.MNIST(
 
 
 def init_params(m):
-    if isinstance(m, nn.Conv2d):
-        nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
-        if m.bias is not None:
-            nn.init.constant_(m.bias, 0)
-    elif isinstance(m, nn.Linear):
-        nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
+    if isinstance(m, nn.Linear):
+        nn.init.xavier_uniform_(m.weight)
         if m.bias is not None:
             nn.init.constant_(m.bias, 0)
 
@@ -41,7 +40,7 @@ class MLP(nn.Module):
         self.layers = nn.ModuleList([nn.Flatten(), nn.Linear(784, embedding_dim)])
 
         # Hidden layers
-        for i in range(num_layers - 1):
+        for _ in range(num_layers - 1):
             self.layers.append(nn.Linear(embedding_dim, embedding_dim))
             self.layers.append(nn.ReLU())
             self.layers.append(nn.Dropout(p=dropout_rate))
@@ -107,21 +106,20 @@ def train(args):
             prev_avg_loss = avg_test_loss
             continue
         else:
-            import IPython; IPython.embed()
-            if args.save:
-                with open(
-                    f"observations/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
-                    "wb",
-                ) as f:
-                    pickle.dump(train_scores, f)
-                    f.close()
-                with open(
-                    f"observations/test_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
-                    "wb",
-                ) as f:
-                    pickle.dump(test_scores, f)
-                    f.close()
             break
+    if args.save:
+        with open(
+            f"observations/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            "wb",
+        ) as f:
+            pickle.dump(train_scores, f)
+            f.close()
+        with open(
+            f"observations/test_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            "wb",
+        ) as f:
+            pickle.dump(test_scores, f)
+            f.close()
     if args.log:
         with open("observations/analytics.txt", "a") as f:
             f.write(
@@ -132,18 +130,17 @@ def train(args):
 
 # TODO: build smarter HP configuration generation
 
-# for width in [32, 64, 128]: # 32, 64, 128
-#     for de in [1, 2, 3, 4]:
-#         for dr in [0.05, 0.1]:
-#             for l in [3e-4, 1e-4, 5e-4]:
-#                 for bsz in [32]:
-#                     train(
-#                         Namespace(
-#                             batch_size=bsz, lr=l, hidden_dim=width, depth=de, dropout=dr, save=save, log=log
-#                         )
-#                     )
-train(
-    Namespace(
-        batch_size=32, lr=5e-4, hidden_dim=32, depth=4, dropout=0.05, save=False, log=False
-    )
-)
+for width in [32, 64, 128]: # 32, 64, 128
+    for de in [1, 2, 3, 4, 5]:
+        for dr in [0.05, 0.1]:
+            for l in [3e-4, 1e-4, 5e-4]:
+                for bsz in 32:
+                    train(
+                        Namespace(
+                            batch_size=bsz, lr=l, hidden_dim=width, depth=de, dropout=dr, save=True, log=True
+                        )
+                    )
+
+# Depth 2 yields 0.15617795686271732 test loss
+
+# Depth 3 yields 0.1382418137762291 test loss

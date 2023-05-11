@@ -1,6 +1,6 @@
 Even after doing a shallow optimization over the nuisance hyperparameters, all architectures yield worse loss as they scale past 2 layers. This must be resolved to ensure validity of the results and if similar behaviour is observed at greater scale.
 
-- [ ] Solve loss vs depth abnormality
+- [x] Solve loss vs depth abnormality
   - [x] Is it the vanishing gradient issue?
 
     Maybe try checking for vanishing gradients?
@@ -40,6 +40,21 @@ Even after doing a shallow optimization over the nuisance hyperparameters, all a
 
     *Vanishing gradient doesn't seem to be the problem.*
 
+  - [x] Is it just simple overfitting?
+
+    I'm doubtful because increasing dropout only negatively impacts the model, but maybe some other kind of regularization needs to be put in place? With the depth set to 4 layers, the training loss for the final epoch averages to 0.13917233482835192 while the test loss averages to 0.1779356023857218. With the depth set to 2 layers, the training loss for the final eopch averages to 0.1712026208177209 while the test loss averages to 0.18512281320078638. Maybe try larger depths with slightly more dropout?
+
+    Depth 4 with 0.055 regularization yields train loss 0.16042481156115732 and test 0.19096997898063078
+    Depth 4 with 0.06 regularization yields train loss 0.1654005287251125 and test 0.21014901985393497
+
+    How does training loss compare across depth? If that's not even greater, no amount of regularization can help us
+    Depth 2 with 0.06 dropout yields train loss 0.147692727419734 and test 0.16831565281925218???
+    Depth 2 with 0.05 dropout yields train loss 0.14235558503915866 and test 0.1696983874411346
+    Depth 4 with 0.05 dropout yields train loss 0.15041534943605464 and test 0.17945787891747056
+
+    Ok something is deeply fundamentally wrong. Figure it out.
+
+    Ahh stupid ass dropout blocked too much signal, scaled regularization faster than model size.
 
 
-- [ ] Rerun shallow grid search to extract heuristics
+- [ ] Build small scale configurator applying learned heuristics
