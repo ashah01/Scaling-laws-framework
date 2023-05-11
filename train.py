@@ -46,7 +46,6 @@ class MLP(nn.Module):
             self.layers.append(nn.ReLU())
             self.layers.append(nn.Dropout(p=dropout_rate))
 
-        # Output layer with softmax activation
         self.layers.append(nn.Linear(embedding_dim, 10))
 
         self.apply(init_params)
@@ -108,6 +107,7 @@ def train(args):
             prev_avg_loss = avg_test_loss
             continue
         else:
+            import IPython; IPython.embed()
             if args.save:
                 with open(
                     f"observations/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
@@ -122,24 +122,28 @@ def train(args):
                     pickle.dump(test_scores, f)
                     f.close()
             break
-
-    with open("observations/analytics.txt", "a") as f:
-        f.write(
-            f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {prev_avg_loss}\n"
-        )
-        f.close()
+    if args.log:
+        with open("observations/analytics.txt", "a") as f:
+            f.write(
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {prev_avg_loss}\n"
+            )
+            f.close()
 
 
 # TODO: build smarter HP configuration generation
 
-save = False
-for width in [32, 64, 128]: # 32, 64, 128
-    for de in [1, 2, 3, 4]:
-        for dr in [0.05, 0.1]:
-            for l in [3e-4, 1e-4, 5e-4]:
-                for bsz in [32]:
-                    train(
-                        Namespace(
-                            batch_size=bsz, lr=l, hidden_dim=width, depth=de, dropout=dr, save=save
-                        )
-                    )
+# for width in [32, 64, 128]: # 32, 64, 128
+#     for de in [1, 2, 3, 4]:
+#         for dr in [0.05, 0.1]:
+#             for l in [3e-4, 1e-4, 5e-4]:
+#                 for bsz in [32]:
+#                     train(
+#                         Namespace(
+#                             batch_size=bsz, lr=l, hidden_dim=width, depth=de, dropout=dr, save=save, log=log
+#                         )
+#                     )
+train(
+    Namespace(
+        batch_size=32, lr=5e-4, hidden_dim=32, depth=4, dropout=0.05, save=False, log=False
+    )
+)
