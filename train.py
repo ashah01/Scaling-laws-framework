@@ -102,26 +102,27 @@ def train(args):
         )
         print(avg_test_loss)
 
-        if avg_test_loss < prev_avg_loss:
-            prev_avg_loss = avg_test_loss
+        if avg_test_loss < best_loss + 0.01:
+            best_loss = min(avg_test_loss, best_loss)
             continue
         else:
             break
+
     if args.save:
         with open(
-            f"observations/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            f"observations/{args.folder}/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(train_scores, f)
             f.close()
         with open(
-            f"observations/test_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            f"observations/{args.folder}/test_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(test_scores, f)
             f.close()
     if args.log:
-        with open("observations/analytics.txt", "a") as f:
+        with open(f"observations/analytics.txt", "a") as f:
             f.write(
                 f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {prev_avg_loss}\n"
             )
@@ -130,17 +131,17 @@ def train(args):
 
 # TODO: build smarter HP configuration generation
 
-for width in [32, 64, 128]: # 32, 64, 128
-    for de in [1, 2, 3, 4, 5]:
-        for dr in [0.05, 0.1]:
-            for l in [3e-4, 1e-4, 5e-4]:
-                for bsz in 32:
-                    train(
-                        Namespace(
-                            batch_size=bsz, lr=l, hidden_dim=width, depth=de, dropout=dr, save=True, log=True
-                        )
-                    )
+# for width in [32, 64, 128]: # 32, 64, 128
+#     for de in [1, 2, 3, 4, 5]:
+#         for dr in [0.05, 0.1]:
+#             for l in [3e-4, 1e-4, 5e-4]:
+#                 for bsz in 32:
+#                     train(
+#                         Namespace(
+#                             batch_size=bsz, lr=l, hidden_dim=width, depth=de, dropout=dr, save=True, log=True
+#                         )
+#                     )
 
-# Depth 2 yields 0.15617795686271732 test loss
 
-# Depth 3 yields 0.1382418137762291 test loss
+for depth in [2, 3, 4, 5, 6]:
+    train(Namespace(batch_size=32, lr=5e-4, hidden_dim=256, depth=depth, dropout=0, save=True, log=True, folder="joshdepthexperiment"))
