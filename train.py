@@ -8,6 +8,7 @@ from tqdm import tqdm
 import math
 import pickle
 from argparse import Namespace
+import os
 
 torch.manual_seed(3407)
 
@@ -56,6 +57,10 @@ class MLP(nn.Module):
 
 
 def train(args):
+    subdir = os.path.join("./observations", args.folder)
+    if not os.path.exists(subdir):
+        os.makedirs(subdir)
+
     trainloader = torch.utils.data.DataLoader(
         trainset, batch_size=args.batch_size, shuffle=True
     )
@@ -69,7 +74,7 @@ def train(args):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
-    prev_avg_loss = float("inf")
+    best_loss = float("inf")
     train_scores = []
     test_scores = []
     num_test_batches = math.ceil(10000 / args.batch_size)
@@ -122,26 +127,26 @@ def train(args):
             pickle.dump(test_scores, f)
             f.close()
     if args.log:
-        with open(f"observations/analytics.txt", "a") as f:
+        with open(f"observations/{args.folder}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {prev_avg_loss}\n"
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {best_loss}\n"
             )
             f.close()
 
 
 # TODO: build smarter HP configuration generation
 
-# for width in [32, 64, 128]: # 32, 64, 128
-#     for de in [1, 2, 3, 4, 5]:
-#         for dr in [0.05, 0.1]:
-#             for l in [3e-4, 1e-4, 5e-4]:
-#                 for bsz in 32:
-#                     train(
-#                         Namespace(
-#                             batch_size=bsz, lr=l, hidden_dim=width, depth=de, dropout=dr, save=True, log=True
-#                         )
-#                     )
 
-
-for depth in [2, 3, 4, 5, 6]:
-    train(Namespace(batch_size=32, lr=5e-4, hidden_dim=256, depth=depth, dropout=0, save=True, log=True, folder="joshdepthexperiment"))
+for width in [32, 64, 128, 256, 512]:
+    train(
+        Namespace(
+            batch_size=32,
+            lr=5e-4,
+            hidden_dim=width,
+            depth=2,
+            dropout=0,
+            save=True,
+            log=True,
+            folder="joshwidthexperiment",
+        )
+    )
