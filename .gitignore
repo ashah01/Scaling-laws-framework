@@ -1,4 +1,4 @@
 data
 .vscode
 .DS_Store
-observations
+__pycache__

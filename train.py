@@ -8,6 +8,9 @@ from tqdm import tqdm
 import math
 import pickle
 from argparse import Namespace
+import os
+
+torch.manual_seed(3407)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -22,66 +25,61 @@ testset = torchvision.datasets.MNIST(
     root="./data", train=False, download=True, transform=transform
 )
 
+
 def init_params(m):
-    if isinstance(m, nn.Conv2d):
-        nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
-        if m.bias is not None:
-            nn.init.constant_(m.bias, 0)
-    elif isinstance(m, nn.Linear):
-        nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
+    if isinstance(m, nn.Linear):
+        nn.init.xavier_uniform_(m.weight)
         if m.bias is not None:
             nn.init.constant_(m.bias, 0)
 
-class Net(nn.Module):
-    def __init__(self, hidden_dim, depth, d1, d2):
-        super(Net, self).__init__()
-        assert depth >= 2
-        modules = [
-            nn.Conv2d(1, hidden_dim, 3, 1),
-            nn.ReLU(),
-            nn.Conv2d(hidden_dim, hidden_dim * 2, 3, 1),
-            nn.ReLU(),
-        ]
-        for _ in range(depth - 2):
-            modules.append(nn.Conv2d(hidden_dim * 2, hidden_dim * 2, 3, 1))
-            modules.append(nn.ReLU())
-        self.convolutions = nn.Sequential(*modules)
-        self.dropout1 = nn.Dropout(d1)
-        self.dropout2 = nn.Dropout(d2)
-        self.fc1 = nn.Linear(
-            ((28 - (depth * 2)) // 2) ** 2 * hidden_dim * 2, hidden_dim * 4
-        )
-        self.fc2 = nn.Linear(hidden_dim * 4, 10)
+
+class MLP(nn.Module):
+    def __init__(self, embedding_dim, num_layers, dropout_rate=0.1):
+        super().__init__()
+
+        # Input layer
+        self.layers = nn.ModuleList([nn.Flatten(), nn.Linear(784, embedding_dim)])
+
+        # Hidden layers
+        for _ in range(num_layers - 1):
+            self.layers.append(nn.Linear(embedding_dim, embedding_dim))
+            self.layers.append(nn.ReLU())
+            self.layers.append(nn.Dropout(p=dropout_rate))
+
+        self.layers.append(nn.Linear(embedding_dim, 10))
+
         self.apply(init_params)
 
     def forward(self, x):
-        x = self.convolutions(x)
-        x = F.max_pool2d(x, 2)  # image dim reduced in half
-        x = self.dropout1(x)
-        x = torch.flatten(x, 1)
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.dropout2(x)
-        x = self.fc2(x)
-        output = F.log_softmax(x, dim=1)
-        return output
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
 
 def train(args):
+    subdir = os.path.join("./observations", args.folder)
+    if not os.path.exists(subdir):
+        os.makedirs(subdir)
 
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=args.batch_size, shuffle=False)
+    trainloader = torch.utils.data.DataLoader(
+        trainset, batch_size=args.batch_size, shuffle=True
+    )
+    testloader = torch.utils.data.DataLoader(
+        testset, batch_size=args.batch_size, shuffle=False
+    )
 
-    net = Net(args.hidden_dim, args.depth, args.dropout1, args.dropout2)
+    net = MLP(args.hidden_dim, args.depth, args.dropout)
     net = net.to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
-    prev_avg_loss = float("inf")
-    avg_test_loss = float("inf") # scoping
     train_scores = []
     test_scores = []
+    avg_test_losses = []
     num_test_batches = math.ceil(10000 / args.batch_size)
+
+    p = 5
 
     while True:
         for data in tqdm(trainloader):
@@ -96,8 +94,7 @@ def train(args):
             train_scores.append(loss.item())
             loss.backward()
             optimizer.step()
-        
-        
+
         with torch.no_grad():
             for data in testloader:
                 images, labels = data
@@ -106,34 +103,54 @@ def train(args):
                 outputs = net(images)
                 l_test = criterion(outputs, labels)
                 test_scores.append(l_test.item())
-        
-        avg_test_loss = sum(test_scores[-num_test_batches:]) / len(test_scores[-num_test_batches:])
+
+        avg_test_loss = sum(test_scores[-num_test_batches:]) / len(
+            test_scores[-num_test_batches:]
+        )
+
+        avg_test_losses.append(avg_test_loss)
         print(avg_test_loss)
 
-        if avg_test_loss < prev_avg_loss:
-            prev_avg_loss = avg_test_loss
-            continue
-        else:
-            print(prev_avg_loss)
-            with open(f"observations/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}", "wb") as f:
-                pickle.dump(train_scores, f)
-                f.close()
-            with open(f"observations/test_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}", "wb") as f:
-                pickle.dump(test_scores, f)
-                f.close()
+        if avg_test_loss > min(avg_test_losses):
+            p -= 1
+        
+        if p == 0:
             break
 
+    if args.save:
+        with open(
+            f"observations/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            "wb",
+        ) as f:
+            pickle.dump(train_scores, f)
+            f.close()
+        with open(
+            f"observations/{args.folder}/test_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            "wb",
+        ) as f:
+            pickle.dump(test_scores, f)
+            f.close()
+    if args.log:
+        with open(f"observations/{args.folder}/analytics.txt", "a") as f:
+            f.write(
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}\n"
+            )
+            f.close()
 
-    with open("observations/analytics.txt", "a") as f:
-        f.write(f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout1: {args.dropout1}, dropout2: {args.dropout2}, loss: {prev_avg_loss}\n")
-        f.close()
 
-#args = Namespace(batch_size=32, lr=3e-4, hidden_dim=64, depth=2, dropout1=0.2, dropout2=0.1)
+# TODO: build smarter HP configuration generation
 
-for bsz in [32, 64, 100]:
-    for l in [3e-4, 1e-4, 8e-5, 5e-5]:
-        for width in [64, 128, 256]:
-            for d in [2, 3, 4, 5]:
-                for d1 in [0.15, 0.2, 0.25, 0.3]:
-                    for d2 in [0.1, 0.15]: # [0.1, 0.15, 0.2]
-                        train(Namespace(batch_size=bsz, lr=l, hidden_dim=width, depth=d, dropout1=d1, dropout2=d2))
+for depth in [2]:
+    for lr in [1e-4, 3e-4]:
+        train(
+            Namespace(
+                batch_size=32,
+                lr=lr,
+                hidden_dim=32,
+                depth=depth,
+                dropout=0,
+                save=False,
+                log=True,
+                folder="smallerlr_thindeep",
+            )
+        )
