@@ -6,3 +6,9 @@ Each scaling law should yield a functional form informing us how performance mea
 - Model size
 - Shape (depth, width, ratio)
 - Batch size
+
+## Model size
+## Shape
+![Widths 32-512 on depth 2](attachments/Figure_1.png)
+
+## Batch size
