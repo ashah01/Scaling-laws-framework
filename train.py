@@ -74,10 +74,12 @@ def train(args):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
-    best_loss = float("inf")
     train_scores = []
     test_scores = []
+    avg_test_losses = []
     num_test_batches = math.ceil(10000 / args.batch_size)
+
+    p = 5
 
     while True:
         for data in tqdm(trainloader):
@@ -105,23 +107,25 @@ def train(args):
         avg_test_loss = sum(test_scores[-num_test_batches:]) / len(
             test_scores[-num_test_batches:]
         )
+
+        avg_test_losses.append(avg_test_loss)
         print(avg_test_loss)
 
-        if avg_test_loss < best_loss + 0.01:
-            best_loss = min(avg_test_loss, best_loss)
-            continue
-        else:
+        if avg_test_loss > min(avg_test_losses):
+            p -= 1
+        
+        if p == 0:
             break
 
     if args.save:
         with open(
-            f"observations/{args.folder}/train_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            f"observations/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(train_scores, f)
             f.close()
         with open(
-            f"observations/{args.folder}/test_scores_b{args.batch_size}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            f"observations/{args.folder}/test_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(test_scores, f)
@@ -129,24 +133,24 @@ def train(args):
     if args.log:
         with open(f"observations/{args.folder}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {best_loss}\n"
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}\n"
             )
             f.close()
 
 
 # TODO: build smarter HP configuration generation
 
-
-for width in [32, 64, 128, 256, 512]:
-    train(
-        Namespace(
-            batch_size=32,
-            lr=5e-4,
-            hidden_dim=width,
-            depth=2,
-            dropout=0,
-            save=True,
-            log=True,
-            folder="joshwidthexperiment",
+for depth in [2]:
+    for lr in [1e-4, 3e-4]:
+        train(
+            Namespace(
+                batch_size=32,
+                lr=lr,
+                hidden_dim=32,
+                depth=depth,
+                dropout=0,
+                save=False,
+                log=True,
+                folder="smallerlr_thindeep",
+            )
         )
-    )

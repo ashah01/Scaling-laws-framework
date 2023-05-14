@@ -1,0 +1,14 @@
+batch size: 32, lr: 0.0001, hidden dim: 32, depth: 2, params: 26506, dropout: 0, loss: 0.1189798322855309
+batch size: 32, lr: 0.0003, hidden dim: 32, depth: 2, params: 26506, dropout: 0, loss: 0.11318165933500013
+batch size: 32, lr: 0.0005, hidden dim: 32, depth: 2, params: 26506, dropout: 0, loss: 0.11129136554795108
+
+batch size: 32, lr: 0.0001, hidden dim: 32, depth: 3, params: 27562, dropout: 0, loss: 0.13102276158564094
+batch size: 32, lr: 0.0003, hidden dim: 32, depth: 3, params: 27562, dropout: 0, loss: 0.1164519392039862
+batch size: 32, lr: 0.0001, hidden dim: 32, depth: 4, params: 28618, dropout: 0, loss: 0.12814139146372652
+batch size: 32, lr: 0.0003, hidden dim: 32, depth: 4, params: 28618, dropout: 0, loss: 0.10563902436561634
+batch size: 32, lr: 0.0001, hidden dim: 32, depth: 5, params: 29674, dropout: 0, loss: 0.12554423718158297
+batch size: 32, lr: 0.0003, hidden dim: 32, depth: 5, params: 29674, dropout: 0, loss: 0.11639439963721507
+batch size: 32, lr: 0.0001, hidden dim: 32, depth: 6, params: 30730, dropout: 0, loss: 0.13471753218372282
+batch size: 32, lr: 0.0003, hidden dim: 32, depth: 6, params: 30730, dropout: 0, loss: 0.12151116431306173
+batch size: 32, lr: 0.0001, hidden dim: 32, depth: 2, params: 26506, dropout: 0, loss: 0.12634103806572594
+batch size: 32, lr: 0.0003, hidden dim: 32, depth: 2, params: 26506, dropout: 0, loss: 0.11469275609970601
