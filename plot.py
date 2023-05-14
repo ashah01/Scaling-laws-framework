@@ -7,7 +7,7 @@ class DataVisualizer:
         self.folder = folder
         self.run = []
     
-    def load_data(self, dir):
+    def load_data(self, dir, filter_):
         with open(f"observations/{dir}/analytics.txt", "r") as file:
             data = file.readlines()
         run = [re.findall(r"[-+]?\d*\.\d+|\d+", line) for line in data]
@@ -18,11 +18,14 @@ class DataVisualizer:
                 else:
                     run[i][j] = float(run[i][j])
         
+        if filter_:
+            for key in filter_:
+                run = [row for row in run if row[self.config[key]] == filter_[key]]
+        
         self.run = run
 
-    def visualize_data(self, x):
-        self.load_data(self.folder)
-        import IPython; IPython.embed()
+    def visualize_data(self, x, filter_: dict = {}):
+        self.load_data(self.folder, filter_)
         plt.plot([row[self.config[x]] for row in self.run], [row[self.config["loss"]] for row in self.run], marker="o")
         plt.xlabel(x)
         plt.ylabel("loss")
