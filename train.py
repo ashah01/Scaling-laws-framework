@@ -78,9 +78,7 @@ def train(args):
     test_scores = []
     avg_test_losses = []
     num_test_batches = math.ceil(10000 / args.batch_size)
-
-    p = 5
-
+    p = 4
     while True:
         for data in tqdm(trainloader):
             inputs, labels = data
@@ -113,7 +111,9 @@ def train(args):
 
         if avg_test_loss > min(avg_test_losses):
             p -= 1
-        
+        else:
+            p = 4
+
         if p == 0:
             break
 
@@ -138,19 +138,30 @@ def train(args):
             f.close()
 
 
-# TODO: build smarter HP configuration generation
 
-for depth in [2]:
-    for lr in [1e-4, 3e-4]:
-        train(
-            Namespace(
-                batch_size=32,
-                lr=lr,
-                hidden_dim=32,
-                depth=depth,
-                dropout=0,
-                save=False,
-                log=True,
-                folder="smallerlr_thindeep",
-            )
+# for depth in [4, 5, 6]:
+#     train(
+#         Namespace(
+#             batch_size=32,
+#             lr=5e-4,
+#             hidden_dim=32,
+#             depth=depth,
+#             dropout=0,
+#             save=False,
+#             log=True,
+#             folder="smallerlr_thindeep",
+#         )
+#     )
+for lr in [7e-4, 5e-4, 3e-4, 1e-4]:
+    train(
+        Namespace(
+            batch_size=32,
+            lr=lr,
+            hidden_dim=32,
+            depth=6,
+            dropout=0,
+            save=False,
+            log=True,
+            folder="smallerlr_thindeep",
         )
+    )

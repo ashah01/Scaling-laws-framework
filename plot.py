@@ -31,10 +31,10 @@ class DataVisualizer:
         plt.ylabel("loss")
         plt.show()
     
-    def visualize_size(self):
+    def visualize_size(self, filter_: dict = {}):
         assert type(self.folder) == list
         for folder in self.folder:
-            self.load_data(folder)
+            self.load_data(folder, filter_)
             plt.plot([row[self.config["params"]] for row in self.run], [row[self.config["loss"]] for row in self.run], label=folder, marker="o")
         plt.legend()
         plt.xlabel("params")

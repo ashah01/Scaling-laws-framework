@@ -8,7 +8,17 @@ Each scaling law should yield a functional form informing us how performance mea
 - Batch size
 
 ## Model size
+
 ## Shape
+
+### Width
+
 ![Widths 32-512 on depth 2](attachments/Figure_1.png)
+
+### Depth
+
+Having some problems getting the correct test loss scores. I'm sceptical that loss actually *decreases* scaling depth.
+
+### Ratio
 
 ## Batch size
