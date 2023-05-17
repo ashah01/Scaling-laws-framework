@@ -1,1 +1,0 @@
-At medium width (64, 128), the model performs better with lower learning rates (3e-4, 1e-4).

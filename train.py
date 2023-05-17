@@ -139,18 +139,16 @@ def train(args):
 
 
 
-for depth in [2, 3, 4, 5, 6]:
-    for widths in [64, 128]:
-        for lr in [7e-4, 5e-4, 3e-4, 1e-4]:
-            train(
-                Namespace(
-                    batch_size=32,
-                    lr=lr,
-                    hidden_dim=widths,
-                    depth=depth,
-                    dropout=0,
-                    save=False,
-                    log=True,
-                    folder="mediumsize_lrsweep",
-                )
-            )
+for dropout in [0, 0.05, 0.1]:
+    train(
+        Namespace(
+            batch_size=64,
+            lr=1e-4,
+            hidden_dim=128,
+            depth=4,
+            dropout=dropout,
+            save=False,
+            log=True,
+            folder="depth_modestwidth",
+        )
+    )
