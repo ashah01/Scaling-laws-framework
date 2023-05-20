@@ -28,7 +28,7 @@ testset = torchvision.datasets.MNIST(
 
 
 def train(args):
-    subdir = os.path.join("./observations", args.folder)
+    subdir = os.path.join(f"./observations/{args.name}", args.folder)
     if not os.path.exists(subdir):
         os.makedirs(subdir)
 
@@ -38,7 +38,6 @@ def train(args):
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=args.batch_size, shuffle=False
     )
-    import IPython; IPython.embed()
     net = ResMLP(args.dropout, args.blocks, args.hidden_dim)
     net = net.to(device)
 
@@ -90,35 +89,38 @@ def train(args):
 
     if args.save:
         with open(
-            f"observations/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.blocks}w{args.hidden_dim}",
+            f"observations/{args.name}/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.blocks}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(train_scores, f)
             f.close()
         with open(
-            f"observations/{args.folder}/test_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.blocks}w{args.hidden_dim}",
+            f"observations/{args.name}/{args.name}/{args.folder}/test_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.blocks}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(test_scores, f)
             f.close()
     if args.log:
-        with open(f"observations/{args.folder}/analytics.txt", "a") as f:
+        with open(f"observations/{args.name}/{args.folder}/analytics.txt", "a") as f:
             f.write(
                 f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.blocks}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}\n"
             )
             f.close()
 
 
-
-train(
-    Namespace(
-        batch_size=32,
-        lr=1e-4,
-        hidden_dim=64,
-        blocks=4,
-        dropout=0,
-        save=True,
-        log=True,
-        folder="activation_experiment",
-    )
-)
+# Get good LR for future experiments
+for lr in [5e-4, 3e-4, 1e-4]:
+    for hd in [32, 64, 128]:
+        train(
+            Namespace(
+                name="ResMLP",
+                batch_size=32,
+                lr=lr,
+                hidden_dim=hd,
+                blocks=1,
+                dropout=0,
+                save=False,
+                log=True,
+                folder="width_blocks1",
+            )
+        )

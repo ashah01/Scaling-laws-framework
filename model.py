@@ -43,13 +43,18 @@ class Residual(nn.Module):
 
     def forward(self, x: torch.tensor) -> torch.Tensor:
 
-        identity = out = x
+        out = x
 
         if not (self.i == 0):
+            identity = out
             out = self.norm_layer1(out)
             out = self.dropout1(out)
+            
         out = self.linear1(out)
         out = self.relu1(out)
+
+        if (self.i == 0):
+            identity = out
 
         out = self.norm_layer2(out)
         out = self.dropout2(out)
