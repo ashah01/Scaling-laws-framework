@@ -9,6 +9,7 @@ import math
 import pickle
 from argparse import Namespace
 import os
+from model import ResMLP
 
 torch.manual_seed(3407)
 
@@ -26,36 +27,6 @@ testset = torchvision.datasets.MNIST(
 )
 
 
-def init_params(m):
-    if isinstance(m, nn.Linear):
-        nn.init.xavier_uniform_(m.weight)
-        if m.bias is not None:
-            nn.init.constant_(m.bias, 0)
-
-
-class MLP(nn.Module):
-    def __init__(self, embedding_dim, num_layers, dropout_rate=0.1):
-        super().__init__()
-
-        # Input layer
-        self.layers = nn.ModuleList([nn.Flatten(), nn.Linear(784, embedding_dim)])
-
-        # Hidden layers
-        for _ in range(num_layers - 1):
-            self.layers.append(nn.Linear(embedding_dim, embedding_dim))
-            self.layers.append(nn.ReLU())
-            self.layers.append(nn.Dropout(p=dropout_rate))
-
-        self.layers.append(nn.Linear(embedding_dim, 10))
-
-        self.apply(init_params)
-
-    def forward(self, x):
-        for layer in self.layers:
-            x = layer(x)
-        return x
-
-
 def train(args):
     subdir = os.path.join("./observations", args.folder)
     if not os.path.exists(subdir):
@@ -67,8 +38,8 @@ def train(args):
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=args.batch_size, shuffle=False
     )
-
-    net = MLP(args.hidden_dim, args.depth, args.dropout)
+    import IPython; IPython.embed()
+    net = ResMLP(args.dropout, args.blocks, args.hidden_dim)
     net = net.to(device)
 
     criterion = nn.CrossEntropyLoss()
@@ -119,13 +90,13 @@ def train(args):
 
     if args.save:
         with open(
-            f"observations/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            f"observations/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.blocks}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(train_scores, f)
             f.close()
         with open(
-            f"observations/{args.folder}/test_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            f"observations/{args.folder}/test_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.blocks}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(test_scores, f)
@@ -133,22 +104,21 @@ def train(args):
     if args.log:
         with open(f"observations/{args.folder}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}\n"
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.blocks}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}\n"
             )
             f.close()
 
 
 
-for dropout in [0, 0.05, 0.1]:
-    train(
-        Namespace(
-            batch_size=64,
-            lr=1e-4,
-            hidden_dim=128,
-            depth=4,
-            dropout=dropout,
-            save=False,
-            log=True,
-            folder="depth_modestwidth",
-        )
+train(
+    Namespace(
+        batch_size=32,
+        lr=1e-4,
+        hidden_dim=64,
+        blocks=4,
+        dropout=0,
+        save=True,
+        log=True,
+        folder="activation_experiment",
     )
+)

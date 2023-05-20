@@ -17,7 +17,7 @@ Each scaling law should yield a functional form informing us how performance mea
 
 ### Depth
 
-Having some problems getting the correct test loss scores. I'm sceptical that loss actually *decreases* scaling depth.
+Having some problems getting the correct test loss scores. I'm sceptical that loss actually *decreases* scaling depth. Maybe try making some architectural improvements?
 
 ### Ratio
 

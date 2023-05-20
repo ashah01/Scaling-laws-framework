@@ -25,8 +25,10 @@ class DataVisualizer:
         self.run = run
 
     def visualize_data(self, x, filter_: dict = {}):
-        self.load_data(self.folder, filter_)
-        plt.plot([row[self.config[x]] for row in self.run], [row[self.config["loss"]] for row in self.run], marker="o")
+        for folder in self.folder:
+            self.load_data(folder, filter_)
+            plt.plot([row[self.config[x]] for row in self.run], [row[self.config["loss"]] for row in self.run], marker="o", label=folder)
+        plt.legend()
         plt.xlabel(x)
         plt.ylabel("loss")
         plt.show()
