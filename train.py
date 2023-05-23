@@ -16,8 +16,9 @@ torch.manual_seed(3407)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 transform = transforms.Compose(
-    [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3801,))]
-)
+    [transforms.ToTensor(),
+     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
 
 trainset = torchvision.datasets.CIFAR10(
     root="./data", train=True, download=True, transform=transform
@@ -108,19 +109,18 @@ def train(args):
             f.close()
 
 
-for depth in [2, 3, 4, 5, 6]:
-    for lr in [1e-4, 9e-5]:
-        train(
-            Namespace(
-                name="TransMLP",
-                batch_size=32,
-                lr=lr,
-                hidden_dim=64,
-                depth=depth,
-                dropout=0,
-                save=False,
-                log=True,
-                folder="depth_width64",
-            )
-        )
+
+train(
+    Namespace(
+        name="TransMLP",
+        batch_size=32,
+        lr=8e-5,
+        hidden_dim=32,
+        depth=10,
+        dropout=0,
+        save=True,
+        log=True,
+        folder="diagnose_depthoptima",
+    )
+)
 

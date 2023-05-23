@@ -35,7 +35,7 @@ class Residual(nn.Module):
             self.dropout1 = nn.Dropout(p=dropout)
             self.linear1 = nn.Linear(num_features, num_features)
         else:
-            self.linear1 = nn.Linear(32*32*3, num_features)
+            self.linear1 = nn.Linear(32 * 32 * 3, num_features)
         self.relu1 = nn.ReLU()
 
         self.norm_layer2 = nn.LayerNorm(num_features)
@@ -165,7 +165,7 @@ class TransMLP(nn.Module):
             self.middle_layers.append(
                 nn.Sequential(nn.LayerNorm(width), nn.Linear(width, width), nn.ReLU())
             )
-        
+
         self.output_layer = nn.Linear(width, 10)
         self.apply(init_params)
 
