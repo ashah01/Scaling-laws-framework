@@ -9,7 +9,7 @@ import math
 import pickle
 from argparse import Namespace
 import os
-from model import ResMLP
+import model
 
 torch.manual_seed(3407)
 
@@ -19,10 +19,10 @@ transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3801,))]
 )
 
-trainset = torchvision.datasets.MNIST(
+trainset = torchvision.datasets.CIFAR10(
     root="./data", train=True, download=True, transform=transform
 )
-testset = torchvision.datasets.MNIST(
+testset = torchvision.datasets.CIFAR10(
     root="./data", train=False, download=True, transform=transform
 )
 
@@ -38,7 +38,7 @@ def train(args):
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=args.batch_size, shuffle=False
     )
-    net = ResMLP(args.dropout, args.blocks, args.hidden_dim)
+    net = getattr(model, args.name)(args.hidden_dim, args.depth)
     net = net.to(device)
 
     criterion = nn.CrossEntropyLoss()
@@ -89,13 +89,13 @@ def train(args):
 
     if args.save:
         with open(
-            f"observations/{args.name}/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.blocks}w{args.hidden_dim}",
+            f"observations/{args.name}/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(train_scores, f)
             f.close()
         with open(
-            f"observations/{args.name}/{args.name}/{args.folder}/test_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.blocks}w{args.hidden_dim}",
+            f"observations/{args.name}/{args.folder}/test_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
             "wb",
         ) as f:
             pickle.dump(test_scores, f)
@@ -103,24 +103,24 @@ def train(args):
     if args.log:
         with open(f"observations/{args.name}/{args.folder}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.blocks}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}\n"
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}\n"
             )
             f.close()
 
 
-# Get good LR for future experiments
-for lr in [5e-4, 3e-4, 1e-4]:
-    for hd in [32, 64, 128]:
+for depth in [2, 3, 4, 5, 6]:
+    for lr in [1e-4, 9e-5]:
         train(
             Namespace(
-                name="ResMLP",
+                name="TransMLP",
                 batch_size=32,
                 lr=lr,
-                hidden_dim=hd,
-                blocks=1,
+                hidden_dim=64,
+                depth=depth,
                 dropout=0,
                 save=False,
                 log=True,
-                folder="width_blocks1",
+                folder="depth_width64",
             )
         )
+
