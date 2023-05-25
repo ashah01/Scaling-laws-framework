@@ -67,7 +67,7 @@ class Residual(nn.Module):
     
 class ResNet(nn.Module):
 
-    def __init__(self, hidden_dim, depth, num_classes=10):
+    def __init__(self, hidden_dim, depth):
         super(ResNet, self).__init__()
         self.net = nn.ModuleList([self.b1(hidden_dim)])
         for i in range(depth):
@@ -75,7 +75,7 @@ class ResNet(nn.Module):
             hidden_dim *= 2
         self.net.append(nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)), nn.Flatten(),
-            nn.Linear(hidden_dim//2, num_classes))) # [num_features, num_classes]
+            nn.Linear(hidden_dim//2, 10))) # [num_features, num_classes]
         self.net.apply(init_cnn)
 
     def b1(self, hidden_dim):
@@ -119,27 +119,3 @@ class TransMLP(nn.Module):
             x = x + layer(x)
         x = self.output_layer(x)
         return x
-
-if __name__ == "__main__":
-    model = ResNet(16, 3)
-
-    transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),  # Random crop of size 32x32 with padding of 4 pixels
-        transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
-        transforms.ToTensor()  # Convert the image to a tensor
-    ])
-
-    trainset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=True, download=True, transform=transform)
-
-    testset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=False, download=True, transform=transform)
-
-    trainloader = torch.utils.data.DataLoader(
-        trainset, batch_size=32, shuffle=True
-    )
-    testloader = torch.utils.data.DataLoader(
-        testset, batch_size=32, shuffle=False
-    )
-
-    sample = next(iter(trainloader))[0]
-
-    print(model(sample).shape)

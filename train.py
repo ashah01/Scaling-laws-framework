@@ -15,17 +15,15 @@ torch.manual_seed(3407)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-transform = transforms.Compose(
-    [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3801,))]
-)
+transform = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),  # Random crop of size 32x32 with padding of 4 pixels
+    transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+    transforms.ToTensor()  # Convert the image to a tensor
+])
 
-trainset = torchvision.datasets.FashionMNIST(
-    root="./data", train=True, download=True, transform=transform
-)
-testset = torchvision.datasets.FashionMNIST(
-    root="./data", train=False, download=True, transform=transform
-)
+trainset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=True, download=True, transform=transform)
 
+testset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=False, download=True, transform=transform)
 
 def train(args):
     subdir = os.path.join(f"./observations/{args.name}", args.folder)
@@ -107,21 +105,19 @@ def train(args):
             )
             f.close()
 
-
-for dp in [2, 3]:
-    for l in [1e-4]:
-        for dr in [0]:
-            train(
-                Namespace(
-                    name="TransMLP",
-                    batch_size=32,
-                    lr=l,
-                    hidden_dim=64,
-                    depth=dp,
-                    dropout=dr,
-                    save=True,
-                    log=True,
-                    folder="diagnose_depthoptima_fashionmnist",
-                )
+for lr in [0.001, 0.0005, 0.0001]:
+    for dp in [1, 2, 3]:
+        train(
+            Namespace(
+                name="ResNet",
+                batch_size=32,
+                lr=lr,
+                hidden_dim=64,
+                depth=dp,
+                dropout=0,
+                save=True,
+                log=True,
+                folder="depth_width64",
             )
+        )
 
