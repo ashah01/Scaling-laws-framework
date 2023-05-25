@@ -15,3 +15,10 @@ The plain/residual architectures follow the form in Fig. 3 (middle/right). The n
 - `num_residuals` should be 2
 - `num_channels` should double each block
 - `kernel_size` should be 3 for `b1`
+
+
+## TODO
+- [x] Build architecture
+- [x] Select correct fixed hyperparameters
+- [ ] Train on varying depths, observe changes in performance
+  - [ ] If nothing improves, adopt ResNet training procedure (optimizer, lr scheduler, etc.)

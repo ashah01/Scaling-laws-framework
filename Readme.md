@@ -40,5 +40,5 @@ Across all widths, loss gets almost linearly worse as depth increases. We've alr
 
 ## 2023/05/22
 
-A standard model that's known to scale well should be used, on a dataset of appropriate difficulty. [[ResNet on CIFAR10]] is chosen for its combination of speed and expressivity. This will rule out whether depth is failing for an architectural reason, or something more elusive such as the fact that no learning rate scheduler is used.
+A standard model that's known to scale well should be used, on a dataset of appropriate difficulty. [[ResNet on CIFAR10]] is chosen for its combination of speed and expressivity. This will rule out whether depth is failing for an architectural reason, or something more elusive such as the absence of a learning rate scheduler.
 
