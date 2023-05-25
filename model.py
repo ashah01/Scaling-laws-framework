@@ -1,7 +1,35 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision
+import torchvision.transforms as transforms
 
+
+"""
+
+import torchvision
+import torchvision.transforms as transforms
+
+transform = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),  # Random crop of size 32x32 with padding of 4 pixels
+    transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+    transforms.ToTensor()  # Convert the image to a tensor
+])
+
+trainset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=True, download=True, transform=transform)
+
+testset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=False, download=True, transform=transform)
+
+trainloader = torch.utils.data.DataLoader(
+    trainset, batch_size=32, shuffle=True
+)
+testloader = torch.utils.data.DataLoader(
+    testset, batch_size=32, shuffle=False
+)
+
+sample = next(iter(trainloader))[0]
+
+"""
 
 def init_params(m):
     if isinstance(m, nn.Linear):
@@ -9,156 +37,72 @@ def init_params(m):
         if m.bias is not None:
             nn.init.constant_(m.bias, 0)
 
+def init_cnn(module):
+    """Initialize weights for CNNs."""
+    if type(module) == nn.Linear or type(module) == nn.Conv2d:
+        nn.init.xavier_uniform_(module.weight)
 
 class Residual(nn.Module):
-    """
-    This module looks like what you find in the original resnet or IC paper
-    (https://arxiv.org/pdf/1905.05928.pdf), except that it's based on MLP, not CNN.
-    If you flag `only_MLP` as True, then it won't use any batch norm, dropout, or
-    residual connections
-
-    """
-
-    def __init__(
-        self,
-        num_features: int,
-        dropout: float,
-        i: int,
-    ):
+    """The Residual block of ResNet models."""
+    def __init__(self, num_channels, in_features, use_1x1conv=False, strides=1):
         super().__init__()
-        self.num_features = num_features
-
-        self.i = i
-
-        if not (self.i == 0):
-            self.norm_layer1 = nn.LayerNorm(num_features)
-            self.dropout1 = nn.Dropout(p=dropout)
-            self.linear1 = nn.Linear(num_features, num_features)
+        self.conv1 = nn.Conv2d(in_features, num_channels, kernel_size=3, padding=1,
+                                   stride=strides)
+        self.conv2 = nn.Conv2d(num_channels, num_channels, kernel_size=3, padding=1)
+        if use_1x1conv:
+            self.conv3 = nn.Conv2d(in_features, num_channels, kernel_size=1,
+                                       stride=strides)
         else:
-            self.linear1 = nn.Linear(32 * 32 * 3, num_features)
-        self.relu1 = nn.ReLU()
+            self.conv3 = None
+        self.bn1 = nn.BatchNorm2d(num_channels)
+        self.bn2 = nn.BatchNorm2d(num_channels)
 
-        self.norm_layer2 = nn.LayerNorm(num_features)
-        self.dropout2 = nn.Dropout(p=dropout)
-        self.linear2 = nn.Linear(num_features, num_features)
-        self.relu2 = nn.ReLU()
+    def forward(self, X):
+        Y = F.relu(self.bn1(self.conv1(X)))
+        Y = self.bn2(self.conv2(Y))
+        if self.conv3:
+            X = self.conv3(X)
+        Y += X
+        return F.relu(Y)
+    
+class ResNet(nn.Module):
 
-    def forward(self, x: torch.tensor) -> torch.Tensor:
-        out = x
+    def __init__(self, hidden_dim, depth, num_classes=10):
+        super(ResNet, self).__init__()
+        self.net = nn.ModuleList([self.b1(hidden_dim)])
+        for i in range(depth):
+            self.net.append(self.block(2, hidden_dim, first_block=(i==0)))
+            hidden_dim *= 2
+        self.net.append(nn.Sequential(
+            nn.AdaptiveAvgPool2d((1, 1)), nn.Flatten(),
+            nn.Linear(hidden_dim//2, num_classes))) # [num_features, num_classes]
+        self.net.apply(init_cnn)
 
-        if not (self.i == 0):
-            identity = out
-            out = self.norm_layer1(out)
-            out = self.dropout1(out)
+    def b1(self, hidden_dim):
+        return nn.Sequential(
+            nn.Conv2d(3, hidden_dim, kernel_size=3, stride=2, padding=3),
+            nn.BatchNorm2d(hidden_dim), nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1))
 
-        out = self.linear1(out)
-        out = self.relu1(out)
+    def block(self, num_residuals, num_channels, first_block=False):
+        blk = []
+        for i in range(num_residuals):
+            if i == 0 and not first_block:
+                blk.append(Residual(num_channels, num_channels//2, use_1x1conv=True, strides=2))
+            else:
+                blk.append(Residual(num_channels, num_channels))
+        return nn.Sequential(*blk)
 
-        if self.i == 0:
-            identity = out
-
-        out = self.norm_layer2(out)
-        out = self.dropout2(out)
-        out = self.linear2(out)
-
-        out += identity
-
-        out = self.relu2(out)
-
-        return out
-
-
-class DownSample(nn.Module):
-    """
-    This module is an MLP, where the number of output features is lower than
-    that of input features. If you flag `only_MLP` as False, it'll add norm
-    and dropout
-
-    """
-
-    def __init__(self, in_features: int, out_features: int, dropout: float):
-        super().__init__()
-        assert in_features > out_features
-
-        self.in_features = in_features
-        self.out_features = out_features
-
-        self.norm_layer = nn.LayerNorm(in_features)
-        self.dropout = nn.Dropout(p=dropout)
-        self.linear = nn.Linear(in_features, out_features)
-        self.relu = nn.ReLU()
-
-    def forward(self, x: torch.tensor) -> torch.Tensor:
-        out = x
-
-        out = self.norm_layer(out)
-        out = self.dropout(out)
-        out = self.linear(out)
-        out = self.relu(out)
-
-        return out
-
-
-class ResMLP(nn.Module):
-    """
-    MLP with optinally batch norm, dropout, and residual connections. I got
-    inspiration from the original ResNet paper and https://arxiv.org/pdf/1905.05928.pdf.
-
-    Downsampling is done after every block so that the features can be encoded
-    and compressed.
-
-    """
-
-    def __init__(
-        self,
-        dropout: float,
-        num_blocks: int,
-        num_initial_features: int,
-    ):
-        super().__init__()
-
-        blocks = []
-
-        # input layer
-        blocks.append(nn.Flatten())
-
-        for i in range(num_blocks):
-            blocks.extend(
-                self._create_block(
-                    num_initial_features,
-                    dropout,
-                    i,
-                )
-            )
-            num_initial_features //= 2
-
-        # last classiciation layer
-        blocks.append(nn.Linear(num_initial_features, 10))
-
-        self.blocks = nn.Sequential(*blocks)
-        self.apply(init_params)
-
-    def _create_block(
-        self,
-        in_features: int,
-        dropout: float,
-        i: int,
-    ) -> list:
-        block = []
-        block.append(Residual(in_features, dropout, i))
-        block.append(DownSample(in_features, in_features // 2, dropout))
-
-        return block
-
-    def forward(self, x: torch.tensor) -> torch.Tensor:
-        return self.blocks(x)
-
+    def forward(self, x):
+        for layer in self.net:
+            x = layer(x)
+        return x
 
 class TransMLP(nn.Module):
     def __init__(self, width, depth):
         super().__init__()
         self.first_layer = nn.Sequential(
-            nn.Flatten(), nn.Linear(32 * 32 * 3, width), nn.ReLU()
+            nn.Flatten(), nn.Linear(28*28, width), nn.ReLU()
         )
         self.middle_layers = nn.ModuleList()
         for _ in range(depth - 1):
@@ -175,3 +119,27 @@ class TransMLP(nn.Module):
             x = x + layer(x)
         x = self.output_layer(x)
         return x
+
+if __name__ == "__main__":
+    model = ResNet(16, 3)
+
+    transform = transforms.Compose([
+        transforms.RandomCrop(32, padding=4),  # Random crop of size 32x32 with padding of 4 pixels
+        transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+        transforms.ToTensor()  # Convert the image to a tensor
+    ])
+
+    trainset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=True, download=True, transform=transform)
+
+    testset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=False, download=True, transform=transform)
+
+    trainloader = torch.utils.data.DataLoader(
+        trainset, batch_size=32, shuffle=True
+    )
+    testloader = torch.utils.data.DataLoader(
+        testset, batch_size=32, shuffle=False
+    )
+
+    sample = next(iter(trainloader))[0]
+
+    print(model(sample).shape)

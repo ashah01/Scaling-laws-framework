@@ -16,14 +16,13 @@ torch.manual_seed(3407)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 transform = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3801,))]
+)
 
-
-trainset = torchvision.datasets.CIFAR10(
+trainset = torchvision.datasets.FashionMNIST(
     root="./data", train=True, download=True, transform=transform
 )
-testset = torchvision.datasets.CIFAR10(
+testset = torchvision.datasets.FashionMNIST(
     root="./data", train=False, download=True, transform=transform
 )
 
@@ -109,18 +108,20 @@ def train(args):
             f.close()
 
 
-
-train(
-    Namespace(
-        name="TransMLP",
-        batch_size=32,
-        lr=8e-5,
-        hidden_dim=32,
-        depth=10,
-        dropout=0,
-        save=True,
-        log=True,
-        folder="diagnose_depthoptima",
-    )
-)
+for dp in [2, 3]:
+    for l in [1e-4]:
+        for dr in [0]:
+            train(
+                Namespace(
+                    name="TransMLP",
+                    batch_size=32,
+                    lr=l,
+                    hidden_dim=64,
+                    depth=dp,
+                    dropout=dr,
+                    save=True,
+                    log=True,
+                    folder="diagnose_depthoptima_fashionmnist",
+                )
+            )
 

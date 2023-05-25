@@ -57,7 +57,7 @@ class DataVisualizer:
                 test_scores = torch.tensor(pickle.load(f))
                 f.close()
 
-            train_epochs = torch.split(train_scores, math.ceil(50000/run["batch size"]))
+            train_epochs = torch.split(train_scores, math.ceil(60000/run["batch size"]))
             test_epochs = torch.split(test_scores, math.ceil(10000/run["batch size"]))
 
             plt.plot([x.mean().item() for x in train_epochs], label="train", marker="o")

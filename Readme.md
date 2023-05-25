@@ -38,4 +38,7 @@ Currently assessing performance. The loss curve is far less dramatic as width is
 
 Across all widths, loss gets almost linearly worse as depth increases. We've already covered training configuration and model architecture, so why else could it be behaving this way?
 
-Let's do a zero test to ensure that the model is actually working (and inspect the layers to ensure the Namespace argumentation is not to blame)
+## 2023/05/22
+
+A standard model that's known to scale well should be used, on a dataset of appropriate difficulty. [[ResNet on CIFAR10]] is chosen for its combination of speed and expressivity.
+
