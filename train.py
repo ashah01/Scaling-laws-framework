@@ -40,7 +40,7 @@ def train(args):
     net = net.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(net.parameters(), lr=args.lr)
+    optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=0.0001)
 
     train_scores = []
     test_scores = []
@@ -105,19 +105,18 @@ def train(args):
             )
             f.close()
 
-for lr in [0.001, 0.0005, 0.0001]:
+for lr in [0.0001, 0.0005, 5e-4]:
     for dp in [1, 2, 3]:
         train(
             Namespace(
                 name="ResNet",
                 batch_size=32,
                 lr=lr,
-                hidden_dim=64,
+                hidden_dim=8,
                 depth=dp,
                 dropout=0,
                 save=True,
                 log=True,
-                folder="depth_width64",
+                folder="depth_width8",
             )
         )
-

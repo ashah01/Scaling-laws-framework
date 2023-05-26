@@ -1,0 +1,2 @@
+batch size: 32, lr: 0.0001, hidden dim: 32, depth: 1, params: 38538, dropout: 0, loss: 0.7986901108258829
+batch size: 32, lr: 0.0001, hidden dim: 32, depth: 2, params: 170762, dropout: 0, loss: 0.7031529960921779
