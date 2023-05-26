@@ -42,3 +42,9 @@ Across all widths, loss gets almost linearly worse as depth increases. We've alr
 
 A standard model that's known to scale well should be used, on a dataset of appropriate difficulty. [[ResNet on CIFAR10]] is chosen for its combination of speed and expressivity. This will rule out whether depth is failing for an architectural reason, or something more elusive such as the absence of a learning rate scheduler.
 
+- [x] Implement ResNet on CIFAR10
+
+Depth appears to be working now, fortunately. That being said, there are two questions that remain:
+
+1. ResNet is so effective that smaller sizes take exceedingly long on the test loss patience early stopping paradigm. Should this be changed? If so, how?
+2. The ResNet architecture scales width by 2x for every increase by one block in depth. This is because the feature map size is halved, so the number of filters is doubled to preserve the time complexity per layer. Does this mean my width vs. depth scaling strategies are fair comparisons?

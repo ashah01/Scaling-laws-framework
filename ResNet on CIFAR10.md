@@ -20,5 +20,7 @@ The plain/residual architectures follow the form in Fig. 3 (middle/right). The n
 ## TODO
 - [x] Build architecture
 - [x] Select correct fixed hyperparameters
-- [ ] Train on varying depths, observe changes in performance
+- [x] Train on varying depths, observe changes in performance
   - [ ] If nothing improves, adopt ResNet training procedure (optimizer, lr scheduler, etc.)
+
+**DEPTH IS WORKING**
