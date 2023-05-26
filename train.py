@@ -105,7 +105,7 @@ def train(args):
             )
             f.close()
 
-for lr in [0.0001, 0.0005, 5e-5]:
+for lr in [0.0001, 0.0005, 8e-5]:
     for dp in [1, 2, 3]:
         train(
             Namespace(
