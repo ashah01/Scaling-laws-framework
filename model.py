@@ -70,8 +70,8 @@ class ResNet(nn.Module):
     def __init__(self, hidden_dim, depth):
         super(ResNet, self).__init__()
         self.net = nn.ModuleList([self.b1(hidden_dim)])
-        for i in range(depth):
-            self.net.append(self.block(2, hidden_dim, first_block=(i==0)))
+        for i in range(3):
+            self.net.append(self.block(2 * depth, hidden_dim, first_block=(i==0)))
             hidden_dim *= 2
         self.net.append(nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)), nn.Flatten(),

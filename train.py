@@ -41,7 +41,7 @@ def train(args):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=0.0001)
-
+    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=4, min_lr=0.001)
     train_scores = []
     test_scores = []
     avg_test_losses = []
@@ -74,10 +74,12 @@ def train(args):
             test_scores[-num_test_batches:]
         )
 
+        # scheduler.step(avg_test_loss)
+
         avg_test_losses.append(avg_test_loss)
         print(avg_test_loss)
 
-        if avg_test_loss > min(avg_test_losses):
+        if avg_test_loss > min(avg_test_losses): # (scheduler.optimizer.param_groups[0]['lr'] - 0.001) < 0.009
             p -= 1
         else:
             p = 4
@@ -105,18 +107,17 @@ def train(args):
             )
             f.close()
 
-for lr in [0.0001, 0.0005, 8e-5]:
-    for dp in [1, 2, 3]:
-        train(
-            Namespace(
-                name="ResNet",
-                batch_size=32,
-                lr=lr,
-                hidden_dim=8,
-                depth=dp,
-                dropout=0,
-                save=True,
-                log=True,
-                folder="depth_width8",
-            )
+for lr in [0.001, 0.01, 0.005, 0.0005]:
+    train(
+        Namespace(
+            name="ResNet",
+            batch_size=32,
+            lr=lr,
+            hidden_dim=16,
+            depth=5,
+            dropout=0,
+            save=False,
+            log=True,
+            folder="reduceonplateau",
         )
+    )
