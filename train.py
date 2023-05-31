@@ -9,6 +9,7 @@ import math
 import pickle
 from argparse import Namespace
 import os
+import time
 import model
 
 torch.manual_seed(3407)
@@ -47,6 +48,7 @@ def train(args):
     avg_test_losses = []
     num_test_batches = math.ceil(10000 / args.batch_size)
     p = 4
+    time_start = time.time()
     while True:
         for data in tqdm(trainloader):
             inputs, labels = data
@@ -86,7 +88,7 @@ def train(args):
 
         if p == 0:
             break
-
+    time_end = time.time()
     if args.save:
         with open(
             f"observations/{args.name}/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
@@ -103,7 +105,7 @@ def train(args):
     if args.log:
         with open(f"observations/{args.name}/{args.folder}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}\n"
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, time: {time_end - time_start}\n"
             )
             f.close()
 
