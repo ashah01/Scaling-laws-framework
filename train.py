@@ -108,8 +108,10 @@ def train(args):
                 f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, time: {time_end - time_start}\n"
             )
             f.close()
-for hd in [8]:
-    for lr in [0.1]:
+
+# ResNet got 0.751 loss on their model for n=5.
+for hd in [16]:
+    for lr in [0.001]:
         train(
             Namespace(
                 name="ResNet",
