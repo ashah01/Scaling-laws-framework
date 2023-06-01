@@ -108,18 +108,18 @@ def train(args):
                 f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, time: {time_end - time_start}\n"
             )
             f.close()
-
-for lr in [0.001, 0.01, 0.005, 0.0005]:
-    train(
-        Namespace(
-            name="ResNet",
-            batch_size=32,
-            lr=lr,
-            hidden_dim=16,
-            depth=5,
-            dropout=0,
-            save=False,
-            log=True,
-            folder="reduceonplateau",
+for hd in [8]:
+    for lr in [0.1]:
+        train(
+            Namespace(
+                name="ResNet",
+                batch_size=32,
+                lr=lr,
+                hidden_dim=hd,
+                depth=5,
+                dropout=0,
+                save=False,
+                log=True,
+                folder="lrtime_acrosswidths",
+            )
         )
-    )

@@ -3,4 +3,3 @@ batch size: 64, lr: 0.001, hidden dim: 8, depth: 3, params: 44554, dropout: 0, l
 
 batch size: 64, lr: 0.001, hidden dim: 16, depth: 1, params: 175626, dropout: 0, loss: 0.7537219848982089
 batch size: 64, lr: 0.001, hidden dim: 16, depth: 2, params: 370506, dropout: 0, loss: 0.7611438890171659
-# Depth 5 at an early stop yielded 0.7286 loss
