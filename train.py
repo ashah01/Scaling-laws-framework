@@ -37,6 +37,7 @@ def train(args):
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=args.batch_size, shuffle=False
     )
+
     net = getattr(model, args.name)(args.hidden_dim, args.depth)
     net = net.to(device)
 
@@ -48,6 +49,7 @@ def train(args):
     avg_test_losses = []
     num_test_batches = math.ceil(10000 / args.batch_size)
     p = 4
+    import IPython; IPython.embed()
     time_start = time.time()
     while True:
         for data in tqdm(trainloader):
@@ -88,7 +90,20 @@ def train(args):
 
         if p == 0:
             break
+
     time_end = time.time()
+
+    running_sum = 0
+    with torch.no_grad():
+        for data in testloader:
+            images, labels = data
+            images = images.to(device)
+            labels = labels.to(device)
+            outputs = torch.nn.functional.log_softmax(net(images), dim=1)
+            running_sum += (outputs.argmax(dim=1) != labels).sum().item()
+
+    print("Error %: ", (running_sum / len(testset)))
+
     if args.save:
         with open(
             f"observations/{args.name}/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
@@ -105,22 +120,24 @@ def train(args):
     if args.log:
         with open(f"observations/{args.name}/{args.folder}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, time: {time_end - time_start}\n"
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}\n"
             )
             f.close()
+    
+
 
 # ResNet got 0.751 loss on their model for n=5.
-for lr in [0.0008, 0.0005]:
-    train(
-        Namespace(
-            name="ResNet",
-            batch_size=64,
-            lr=lr,
-            hidden_dim=16,
-            depth=5,
-            dropout=0,
-            save=True,
-            log=True,
-            folder="time_acrosslr",
-        )
+
+train(
+    Namespace(
+        name="ResNet",
+        batch_size=64,
+        lr=1e-3,
+        hidden_dim=16,
+        depth=5,
+        dropout=0,
+        save=False,
+        log=False,
+        folder="time_acrosslr",
     )
+)
