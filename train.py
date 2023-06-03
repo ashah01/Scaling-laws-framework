@@ -110,18 +110,17 @@ def train(args):
             f.close()
 
 # ResNet got 0.751 loss on their model for n=5.
-for hd in [16]:
-    for lr in [0.001]:
-        train(
-            Namespace(
-                name="ResNet",
-                batch_size=32,
-                lr=lr,
-                hidden_dim=hd,
-                depth=5,
-                dropout=0,
-                save=False,
-                log=True,
-                folder="lrtime_acrosswidths",
-            )
+for lr in [0.0008, 0.0005]:
+    train(
+        Namespace(
+            name="ResNet",
+            batch_size=64,
+            lr=lr,
+            hidden_dim=16,
+            depth=5,
+            dropout=0,
+            save=True,
+            log=True,
+            folder="time_acrosslr",
         )
+    )
