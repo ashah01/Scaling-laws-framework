@@ -47,7 +47,7 @@ class DataVisualizer:
         plt.show()
 
     
-    def visualize_capacity(self, run: dict):
+    def visualize_performance(self, run: dict):
         for folder in self.folder:
             with open(f"observations/{folder}/train_scores_b{run['batch size']}dr{run['dropout']}lr{run['lr']}d{run['depth']}w{run['width']}", "rb") as f:
                 train_scores = torch.tensor(pickle.load(f))
@@ -57,7 +57,7 @@ class DataVisualizer:
                 test_scores = torch.tensor(pickle.load(f))
                 f.close()
 
-            train_epochs = torch.split(train_scores, math.ceil(60000/run["batch size"]))
+            train_epochs = torch.split(train_scores, math.ceil(50000/run["batch size"]))
             test_epochs = torch.split(test_scores, math.ceil(10000/run["batch size"]))
 
             plt.plot([x.mean().item() for x in train_epochs], label="train", marker="o")
@@ -67,6 +67,6 @@ class DataVisualizer:
 
             best_train = min([x.mean().item() for x in train_epochs][-5:])
             best_test = min([x.mean().item() for x in test_epochs][-5:])
-            print("Train-test loss difference: ",  best_train - best_test)
+            print("Train-test loss difference: ",  abs(best_train - best_test))
             print("Best train loss: ", best_train)
             print("Best test loss: ", best_test)

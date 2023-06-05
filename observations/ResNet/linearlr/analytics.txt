@@ -1,0 +1,2 @@
+batch size: 64, lr: 0.001, hidden dim: 16, depth: 2, params: 177738, dropout: 0, loss: 0.745798279525368, error %: 0.2619, time: 1279.7649009227753, epochs: 38
+batch size: 64, lr: 0.001, hidden dim: 16, depth: 5, params: 470058, dropout: 0, loss: 0.6188342521904381, error %: 0.2028, time: 6248.845473766327, epochs: 70

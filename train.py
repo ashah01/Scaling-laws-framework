@@ -43,15 +43,13 @@ def train(args):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=0.0001)
-    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=4, min_lr=0.001)
+    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0.05, total_iters=20)
     train_scores = []
     test_scores = []
     avg_test_losses = []
     num_test_batches = math.ceil(10000 / args.batch_size)
-    p = 4
-    import IPython; IPython.embed()
     time_start = time.time()
-    while True:
+    for epoch in range(70):
         for data in tqdm(trainloader):
             inputs, labels = data
             inputs = inputs.to(device)
@@ -78,18 +76,12 @@ def train(args):
             test_scores[-num_test_batches:]
         )
 
-        # scheduler.step(avg_test_loss)
-
         avg_test_losses.append(avg_test_loss)
         print(avg_test_loss)
 
-        if avg_test_loss > min(avg_test_losses): # (scheduler.optimizer.param_groups[0]['lr'] - 0.001) < 0.009
-            p -= 1
-        else:
-            p = 4
+        if epoch + 1 >= 50:
 
-        if p == 0:
-            break
+            scheduler.step()
 
     time_end = time.time()
 
@@ -120,7 +112,7 @@ def train(args):
     if args.log:
         with open(f"observations/{args.name}/{args.folder}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}\n"
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}, epochs: {epoch + 1}\n"
             )
             f.close()
     
@@ -137,7 +129,7 @@ train(
         depth=5,
         dropout=0,
         save=False,
-        log=False,
-        folder="time_acrosslr",
+        log=True,
+        folder="linearlr",
     )
 )
