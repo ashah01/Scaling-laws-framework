@@ -43,7 +43,7 @@ def train(args):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=0.0001)
-    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0.1, total_iters=20)
+    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=20)
     train_scores = []
     test_scores = []
     avg_test_losses = []
