@@ -118,18 +118,17 @@ def train(args):
     
 
 
-# ResNet got 0.751 loss on their model for n=5.
 
 train(
     Namespace(
         name="ResNet",
-        batch_size=64,
+        batch_size=32,
         lr=1e-3,
-        hidden_dim=16,
-        depth=5,
+        hidden_dim=8,
+        depth=1,
         dropout=0,
         save=False,
-        log=True,
+        log=False,
         folder="linearlr",
     )
 )

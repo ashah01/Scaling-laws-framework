@@ -31,7 +31,7 @@ sample = next(iter(trainloader))[0]
 
 def init_params(m):
     if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
-        nn.init.xavier_uniform_(m.weight)
+        nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
         if m.bias is not None:
             nn.init.constant_(m.bias, 0)
 
