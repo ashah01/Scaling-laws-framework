@@ -43,7 +43,7 @@ def train(args):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=0.0001)
-    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=20)
+    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=len(trainloader)*70) # total_updates = (trainset / batch_size) * num_epochs
     train_scores = []
     test_scores = []
     avg_test_losses = []
@@ -62,6 +62,7 @@ def train(args):
             train_scores.append(loss.item())
             loss.backward()
             optimizer.step()
+            scheduler.step()
 
         with torch.no_grad():
             for data in testloader:
@@ -78,10 +79,6 @@ def train(args):
 
         avg_test_losses.append(avg_test_loss)
         print(avg_test_loss)
-
-        if epoch + 1 >= 50:
-
-            scheduler.step()
 
     time_end = time.time()
 
@@ -122,10 +119,10 @@ def train(args):
 train(
     Namespace(
         name="ResNet",
-        batch_size=32,
+        batch_size=64,
         lr=1e-3,
-        hidden_dim=8,
-        depth=1,
+        hidden_dim=16,
+        depth=3,
         dropout=0,
         save=False,
         log=False,
