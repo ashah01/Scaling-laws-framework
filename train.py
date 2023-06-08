@@ -43,13 +43,13 @@ def train(args):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=0.0001)
-    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=len(trainloader)*90) # total_updates = (trainset / batch_size) * num_epochs
+    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=len(trainloader)*args.epochs) # total_updates = (trainset / batch_size) * num_epochs
     train_scores = []
     test_scores = []
     avg_test_losses = []
     num_test_batches = math.ceil(10000 / args.batch_size)
     time_start = time.time()
-    for epoch in range(90):
+    for epoch in range(args.epochs):
         for data in tqdm(trainloader):
             inputs, labels = data
             inputs = inputs.to(device)
@@ -109,16 +109,17 @@ def train(args):
     if args.log:
         with open(f"observations/{args.name}/{args.folder}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}, epochs: {epoch + 1}\n"
+                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}, epochs: {args.epochs}\n"
             )
             f.close()
     
 
 
-for d in [3, 5]:
+for d in [3, 5, 7, 9]:
     train(
         Namespace(
             name="ResNet",
+            epochs=30,
             batch_size=128,
             lr=1e-3,
             hidden_dim=16,
@@ -126,6 +127,6 @@ for d in [3, 5]:
             dropout=0,
             save=True,
             log=True,
-            folder="longer_train",
+            folder="scale_depth",
         )
     )
