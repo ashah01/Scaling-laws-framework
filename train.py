@@ -12,7 +12,7 @@ import os
 import time
 import model
 
-torch.manual_seed(3407)
+torch.manual_seed(1)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -43,13 +43,13 @@ def train(args):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=0.0001)
-    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=len(trainloader)*70) # total_updates = (trainset / batch_size) * num_epochs
+    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=len(trainloader)*90) # total_updates = (trainset / batch_size) * num_epochs
     train_scores = []
     test_scores = []
     avg_test_losses = []
     num_test_batches = math.ceil(10000 / args.batch_size)
     time_start = time.time()
-    for epoch in range(70):
+    for epoch in range(90):
         for data in tqdm(trainloader):
             inputs, labels = data
             inputs = inputs.to(device)
@@ -115,17 +115,17 @@ def train(args):
     
 
 
-
-train(
-    Namespace(
-        name="ResNet",
-        batch_size=64,
-        lr=1e-3,
-        hidden_dim=16,
-        depth=3,
-        dropout=0,
-        save=False,
-        log=False,
-        folder="linearlr",
+for d in [3, 5]:
+    train(
+        Namespace(
+            name="ResNet",
+            batch_size=128,
+            lr=1e-3,
+            hidden_dim=16,
+            depth=d,
+            dropout=0,
+            save=True,
+            log=True,
+            folder="longer_train",
+        )
     )
-)
