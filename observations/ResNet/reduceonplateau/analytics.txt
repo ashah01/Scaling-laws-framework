@@ -1,5 +1,0 @@
-batch size: 64, lr: 0, hidden dim: 8, depth: 3, params: 44554, dropout: 0, loss: 1.5863134564867445
-batch size: 64, lr: 0.001, hidden dim: 8, depth: 3, params: 44554, dropout: 0, loss: 1.0631115087278329
-
-batch size: 64, lr: 0.001, hidden dim: 16, depth: 1, params: 175626, dropout: 0, loss: 0.7537219848982089
-batch size: 64, lr: 0.001, hidden dim: 16, depth: 2, params: 370506, dropout: 0, loss: 0.7611438890171659

@@ -115,18 +115,18 @@ def train(args):
     
 
 
-for d in [3, 5, 7, 9]:
+for depth in [3, 5, 7, 9]:
     train(
         Namespace(
             name="ResNet",
-            epochs=30,
+            epochs=50,
             batch_size=128,
-            lr=1e-3,
+            lr=0.004,
             hidden_dim=16,
-            depth=d,
+            depth=depth,
             dropout=0,
-            save=True,
+            save=False,
             log=True,
-            folder="scale_depth",
+            folder="lrsweep",
         )
     )
