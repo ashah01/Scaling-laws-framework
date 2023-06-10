@@ -1,5 +1,0 @@
-batch size: 64, lr: 0.01, hidden dim: 16, depth: 5, params: 470058, dropout: 0, loss: 0.9721214475145765, time: 853.0261907577515
-batch size: 64, lr: 0.005, hidden dim: 16, depth: 5, params: 470058, dropout: 0, loss: 0.856772740555417, time: 812.6507465839386
-batch size: 64, lr: 0.001, hidden dim: 16, depth: 5, params: 470058, dropout: 0, loss: 0.6734412426401855, time: 2467.691465139389
-batch size: 64, lr: 0.0008, hidden dim: 16, depth: 5, params: 470058, dropout: 0, loss: 0.7912895480158982, time: 1736.6168899536133
-batch size: 64, lr: 0.0005, hidden dim: 16, depth: 5, params: 470058, dropout: 0, loss: 0.7115468039254474, time: 4112.880566120148
