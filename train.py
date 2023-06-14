@@ -40,7 +40,7 @@ def train(args):
 
     net = getattr(model, args.name)(args.hidden_dim, args.depth)
     net = net.to(device)
-
+    import IPython; IPython.embed() # Check FLOPs using pthflop.count_ops
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=0.0001)
     scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=len(trainloader)*args.epochs) # total_updates = (trainset / batch_size) * num_epochs
@@ -114,19 +114,18 @@ def train(args):
             f.close()
     
 
-
-for depth in [3, 5, 7, 9]:
+for lr in [0.5, 0.1, 0.05, 0.025, 0.01, 0.007, 0.005, 0.003, 0.001]:
     train(
         Namespace(
             name="ResNet",
             epochs=50,
             batch_size=128,
-            lr=0.004,
+            lr=lr,
             hidden_dim=16,
-            depth=depth,
+            depth=3,
             dropout=0,
-            save=False,
+            save=True,
             log=True,
-            folder="lrsweep",
+            folder="lrsweep_large",
         )
     )
