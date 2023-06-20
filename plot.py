@@ -6,7 +6,7 @@ import math
 
 class DataVisualizer:
     def __init__(self, folder):
-        self.config = {"batch_size": 0, "lr": 1, "width": 2, "depth": 3, "params": 4, "dropout": 5, "loss": 6}
+        self.config = {"batch_size": 0, "lr": 1, "width": 2, "depth": 3, "params": 4, "dropout": 5, "loss": 6, "error": 7, "time": 8, "epochs": 9}
         self.folder = folder
         self.run = []
     
@@ -21,13 +21,12 @@ class DataVisualizer:
                 else:
                     run[i][j] = float(run[i][j])
         
-        if filter_:
-            for key in filter_:
-                run = [row for row in run if row[self.config[key]] == filter_[key]]
+        
+        run = list(filter(filter_, run))
         
         self.run = run
 
-    def visualize_data(self, x, filter_: dict = {}):
+    def visualize_data(self, x, filter_: lambda x: x):
         for folder in self.folder:
             self.load_data(folder, filter_)
             plt.plot([row[self.config[x]] for row in self.run], [row[self.config["loss"]] for row in self.run], marker="o", label=folder)
@@ -36,7 +35,7 @@ class DataVisualizer:
         plt.ylabel("loss")
         plt.show()
     
-    def visualize_size(self, filter_: dict = {}):
+    def visualize_size(self, filter_: lambda x: x):
         assert type(self.folder) == list
         for folder in self.folder:
             self.load_data(folder, filter_)
