@@ -33,6 +33,8 @@ class DataVisualizer:
         plt.legend()
         plt.xlabel(x)
         plt.ylabel("loss")
+        if x == "lr":
+            plt.xscale("log")
         plt.show()
     
     def visualize_size(self, filter_: lambda x: x):

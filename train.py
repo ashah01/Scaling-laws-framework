@@ -114,18 +114,18 @@ def train(args):
             f.close()
     
 
-for lr in [0.5, 0.1, 0.05, 0.025, 0.01, 0.007, 0.005, 0.003, 0.001]:
+for lr in [0.01]:
     train(
         Namespace(
             name="ResNet",
             epochs=50,
             batch_size=128,
-            lr=lr,
+            lr=0.01,
             hidden_dim=16,
-            depth=3,
+            depth=9,
             dropout=0,
-            save=True,
+            save=False,
             log=True,
-            folder="lrsweep_large",
+            folder="joshgradient",
         )
     )

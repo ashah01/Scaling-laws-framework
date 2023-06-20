@@ -8,6 +8,7 @@ config = {"batch_size": 0, "lr": 1, "width": 2, "depth": 3, "params": 4, "dropou
 parser = argparse.ArgumentParser(description='Aggregate results from multiple runs')
 parser.add_argument('--folder', type=str, required=True, help="The name of the destination folder")
 parser.add_argument('--sort', type=str, required=True, help="The key by which to sort the values")
+parser.add_argument('--sort2', type=str, required=True, help="The key by which to sort the values")
 parser.add_argument('--names', nargs='+', type=str, required=True, help="The names of the runs")
 
 
@@ -32,7 +33,8 @@ for i in range(len(run)):
             run[i][j] = float(run[i][j])
 
 # Sort them
-entries = sorted(run, key=lambda x: x[config[args.sort]])
+import IPython; IPython.embed()
+entries = sorted(run, key=lambda x: (x[config[args.sort]], x[config[args.sort2]]))
 
 # Save to new folder
 subdir = os.path.join(f"./observations/ResNet", args.folder, "analytics.txt")
