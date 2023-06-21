@@ -31,7 +31,7 @@ class DataVisualizer:
         ranges = count_occurrences([col[self.config[y]] for col in self.run])
         clumps = clump_subarrays(self.run, ranges)
         for v in clumps:
-            plt.plot([i[self.config[x]] for i in v], [a[self.config['loss']] for a in v], marker="o", label=v[0][self.config[y]])
+            plt.plot([i[self.config[x]] for i in v], [a[self.config['loss']] for a in v], marker="o", label=f"{y}: {v[0][self.config[y]]}")
         plt.legend()
         plt.xlabel(x)
         plt.ylabel("loss")
