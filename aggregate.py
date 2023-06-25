@@ -33,7 +33,6 @@ for i in range(len(run)):
             run[i][j] = float(run[i][j])
 
 # Sort them
-import IPython; IPython.embed()
 entries = sorted(run, key=lambda x: (x[config[args.sort]], x[config[args.sort2]]))
 
 # Save to new folder
