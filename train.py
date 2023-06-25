@@ -41,7 +41,7 @@ def train(args):
     net = getattr(model, args.name)(args.hidden_dim, args.depth)
     net = net.to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=0.0001)
+    optimizer = optim.AdamW(net.parameters(), lr=args.lr, weight_decay=0.0001)
     scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=len(trainloader)*args.epochs) # total_updates = (trainset / batch_size) * num_epochs
     train_scores = []
     test_scores = []
