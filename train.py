@@ -111,20 +111,21 @@ def train(args):
                 f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}, epochs: {args.epochs}\n"
             )
             f.close()
-    
 
-for lr in [0.01]:
-    train(
-        Namespace(
-            name="ResNet",
-            epochs=50,
-            batch_size=128,
-            lr=0.01,
-            hidden_dim=16,
-            depth=9,
-            dropout=0,
-            save=False,
-            log=True,
-            folder="joshgradient",
-        )
-    )
+for l in [0.0005, 0.0001]:
+    for d in [2, 3, 5, 7, 9]:
+        if not ((d == 2 or d == 3 or d == 5) and l == 0.0005):
+            train(
+                Namespace(
+                    name="ResNet",
+                    epochs=50,
+                    batch_size=128,
+                    lr=l,
+                    hidden_dim=16,
+                    depth=d,
+                    dropout=0,
+                    save=False,
+                    log=True,
+                    folder="adamw_lr",
+                )
+            )
