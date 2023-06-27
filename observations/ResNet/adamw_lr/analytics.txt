@@ -26,3 +26,10 @@ batch size: 128, lr: 0.001, hidden dim: 16, depth: 9, params: 859818, dropout: 0
 batch size: 128, lr: 0.0005, hidden dim: 16, depth: 2, params: 177738, dropout: 0, loss: 0.8673715727238716, error %: 0.2984, time: 1180.385545015335, epochs: 50
 batch size: 128, lr: 0.0005, hidden dim: 16, depth: 3, params: 275178, dropout: 0, loss: 0.8457684441457821, error %: 0.2992, time: 1256.5541524887085, epochs: 50
 batch size: 128, lr: 0.0005, hidden dim: 16, depth: 5, params: 470058, dropout: 0, loss: 0.8534821988661078, error %: 0.297, time: 1389.3920459747314, epochs: 50
+batch size: 128, lr: 0.0005, hidden dim: 16, depth: 7, params: 664938, dropout: 0, loss: 0.8675979496557501, error %: 0.3078, time: 1465.0930087566376, epochs: 50
+batch size: 128, lr: 0.0005, hidden dim: 16, depth: 9, params: 859818, dropout: 0, loss: 0.8533278002014643, error %: 0.2917, time: 1592.984781742096, epochs: 50
+batch size: 128, lr: 0.0001, hidden dim: 16, depth: 2, params: 177738, dropout: 0, loss: 1.174867328209213, error %: 0.4236, time: 1163.3174839019775, epochs: 50
+batch size: 128, lr: 0.0001, hidden dim: 16, depth: 3, params: 275178, dropout: 0, loss: 1.189227642137793, error %: 0.4314, time: 1231.0490744113922, epochs: 50
+batch size: 128, lr: 0.0001, hidden dim: 16, depth: 5, params: 470058, dropout: 0, loss: 1.189558489413201, error %: 0.4354, time: 1372.6568722724915, epochs: 50
+batch size: 128, lr: 0.0001, hidden dim: 16, depth: 7, params: 664938, dropout: 0, loss: 1.2172513302368453, error %: 0.438, time: 1508.2676267623901, epochs: 50
+batch size: 128, lr: 0.0001, hidden dim: 16, depth: 9, params: 859818, dropout: 0, loss: 1.2319699299486377, error %: 0.4492, time: 1625.8447318077087, epochs: 50
