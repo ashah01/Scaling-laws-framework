@@ -1,54 +1,68 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 import torch.optim as optim
 from tqdm import tqdm
-import math
 import pickle
-from argparse import Namespace
 import os
 import time
+import itertools
 import model
+from plot import DataVisualizer
+from operator import itemgetter
 
 torch.manual_seed(1)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-transform = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),  # Random crop of size 32x32 with padding of 4 pixels
-    transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
-    transforms.ToTensor()  # Convert the image to a tensor
-])
+transform = transforms.Compose(
+    [
+        transforms.RandomCrop(
+            32, padding=4
+        ),  # Random crop of size 32x32 with padding of 4 pixels
+        transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+        transforms.ToTensor(),  # Convert the image to a tensor
+    ]
+)
 
-trainset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=True, download=True, transform=transform)
+trainset = torchvision.datasets.CIFAR10(
+    root="./data/CIFAR10", train=True, download=True, transform=transform
+)
 
-testset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=False, download=True, transform=transform)
+testset = torchvision.datasets.CIFAR10(
+    root="./data/CIFAR10", train=False, download=True, transform=transform
+)
 
-def train(args):
-    subdir = os.path.join(f"./observations/{args.name}", args.folder)
+
+def train(**kwargs):
+    subdir = os.path.join(f"./observations/{kwargs['name']}", kwargs["folder"])
     if not os.path.exists(subdir):
         os.makedirs(subdir)
 
     trainloader = torch.utils.data.DataLoader(
-        trainset, batch_size=args.batch_size, shuffle=True
+        trainset, batch_size=kwargs["batch_size"], shuffle=True
     )
     testloader = torch.utils.data.DataLoader(
-        testset, batch_size=args.batch_size, shuffle=False
+        testset, batch_size=kwargs["batch_size"], shuffle=False
     )
 
-    net = getattr(model, args.name)(args.hidden_dim, args.depth)
+    net = getattr(model, kwargs["name"])(kwargs["hidden_dim"], kwargs["depth"])
     net = net.to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.AdamW(net.parameters(), lr=args.lr, weight_decay=0.0001)
-    scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1, end_factor=0, total_iters=len(trainloader)*args.epochs) # total_updates = (trainset / batch_size) * num_epochs
+    optimizer = optim.AdamW(
+        net.parameters(), lr=kwargs["lr"], weight_decay=kwargs["wd"]
+    )
+    scheduler = optim.lr_scheduler.LinearLR(
+        optimizer,
+        start_factor=1,
+        end_factor=0,
+        total_iters=len(trainloader) * kwargs["epochs"],
+    )
     train_scores = []
-    test_scores = []
     avg_test_losses = []
-    num_test_batches = math.ceil(10000 / args.batch_size)
     time_start = time.time()
-    for epoch in range(args.epochs):
+    for epoch in range(kwargs["epochs"]):
         for data in tqdm(trainloader):
             inputs, labels = data
             inputs = inputs.to(device)
@@ -63,6 +77,7 @@ def train(args):
             optimizer.step()
             scheduler.step()
 
+        test_scores = []
         with torch.no_grad():
             for data in testloader:
                 images, labels = data
@@ -72,15 +87,12 @@ def train(args):
                 l_test = criterion(outputs, labels)
                 test_scores.append(l_test.item())
 
-        avg_test_loss = sum(test_scores[-num_test_batches:]) / len(
-            test_scores[-num_test_batches:]
-        )
+        avg_test_loss = sum(test_scores) / len(test_scores)
 
         avg_test_losses.append(avg_test_loss)
         print(avg_test_loss)
 
     time_end = time.time()
-
     running_sum = 0
     with torch.no_grad():
         for data in testloader:
@@ -92,40 +104,77 @@ def train(args):
 
     print("Error %: ", (running_sum / len(testset)))
 
-    if args.save:
+    if kwargs["save"]:
+        identity_ = f"b{kwargs['batch_size']}dr{kwargs['dropout']}lr{kwargs['lr']}d{kwargs['depth']}w{kwargs['hidden_dim']}"
         with open(
-            f"observations/{args.name}/{args.folder}/train_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            f"{subdir}/train_scores_{identity_}",
             "wb",
         ) as f:
             pickle.dump(train_scores, f)
             f.close()
         with open(
-            f"observations/{args.name}/{args.folder}/test_scores_b{args.batch_size}dr{args.dropout}lr{args.lr}d{args.depth}w{args.hidden_dim}",
+            f"{subdir}/test_scores_{identity_}",
             "wb",
         ) as f:
             pickle.dump(test_scores, f)
             f.close()
-    if args.log:
-        with open(f"observations/{args.name}/{args.folder}/analytics.txt", "a") as f:
+    if kwargs["log"]:
+        with open(f"{subdir}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {args.batch_size}, lr: {args.lr}, hidden dim: {args.hidden_dim}, depth: {args.depth}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {args.dropout}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}, epochs: {args.epochs}\n"
+                f"batch size: {kwargs['batch_size']}, lr: {kwargs['lr']}, hidden dim: {kwargs['hidden_dim']}, depth: {kwargs['depth']}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {kwargs['dropout']}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}, epochs: {kwargs['epochs']}\n"
             )
             f.close()
 
-for l in [0.0005, 0.0001]:
-    for d in [2, 3, 5, 7, 9]:
-        if not ((d == 2 or d == 3 or d == 5) and l == 0.0005):
-            train(
-                Namespace(
-                    name="ResNet",
-                    epochs=50,
-                    batch_size=128,
-                    lr=l,
-                    hidden_dim=16,
-                    depth=d,
-                    dropout=0,
-                    save=False,
-                    log=True,
-                    folder="adamw_lr",
-                )
-            )
+
+def recursive_call(**args):
+    assert type(args["name"]) != list
+    assert type(args["folder"]) != list
+    search_space = dict(filter(lambda x: type(x[1]) == list, args.items()))
+    constant = dict(filter(lambda x: type(x[1]) != list, args.items()))
+    call_combinations(search_space, constant, train)
+
+
+def call_combinations(dictionary, constant, function):
+    keys = dictionary.keys()
+    values = dictionary.values()
+    combinations = list(itertools.product(*values))
+
+    combinations_todo = prune_combinations(
+        combinations, f"{constant['name']}/{constant['folder']}", keys
+    )
+    for combo in combinations_todo:
+        function_args = dict(zip(keys, combo))
+        function(**constant, **function_args)
+
+
+def prune_combinations(combos, dir, k):
+    dv = DataVisualizer(dir)
+    dv.load_data(lambda x: x)
+    indices = itemgetter(*k)(dv.config)
+    final_run = itemgetter(*indices)(dv.run[-1])
+    pruned = delete_items_preceding(combos, final_run)
+
+    return pruned
+
+
+def delete_items_preceding(lst, value):
+    if value in lst:
+        index = lst.index(value)
+        del lst[: index + 1]
+    return lst
+
+
+# polymorphism implemented through arrays
+recursive_call(
+    name="ResNet",
+    epochs=50,
+    batch_size=128,
+    lr=[0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001],
+    wd=0.0001,
+    hidden_dim=16,
+    depth=[2, 3, 5, 7, 9],
+    dropout=0,
+    save=False,
+    log=False,
+    folder="adamw_lr",
+)
