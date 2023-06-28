@@ -9,6 +9,8 @@ import os
 import time
 import itertools
 import model
+from plot import DataVisualizer
+from operator import itemgetter
 
 torch.manual_seed(1)
 
@@ -125,6 +127,8 @@ def train(**kwargs):
 
 
 def recursive_call(**args):
+    assert type(args['name']) != list
+    assert type(args['folder']) != list
     search_space = dict(filter(lambda x: type(x[1]) == list, args.items()))
     constant = dict(filter(lambda x: type(x[1]) != list, args.items()))
     call_combinations(search_space, constant, train)
@@ -135,20 +139,36 @@ def call_combinations(dictionary, constant, function):
     values = dictionary.values()
     combinations = list(itertools.product(*values))
 
-    for combo in combinations:
+    combinations_todo = prune_combinations(combinations, f"{constant['name']}/{constant['folder']}", keys)
+    for combo in combinations_todo:
         function_args = dict(zip(keys, combo))
         function(**constant, **function_args)
 
+def prune_combinations(combos, dir, k):
+    dv = DataVisualizer(dir)
+    dv.load_data(lambda x: x)
+    indices = itemgetter(*k)(dv.config)
+    final_run = itemgetter(*indices)(dv.run[-1])
+    pruned = delete_items_preceding(combos, final_run)
+
+    return pruned
+
+
+def delete_items_preceding(lst, value):
+    if value in lst:
+        index = lst.index(value)
+        del lst[:index + 1]
+    return lst
 
 # polymorphism implemented through arrays
 recursive_call(
     name="ResNet",
-    epochs=10,
+    epochs=50,
     batch_size=128,
-    lr=[0.05, 0.01, 0.005],
+    lr=[0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001],
     wd=0.0001,
     hidden_dim=16,
-    depth=[3, 5, 7],
+    depth=[2, 3, 5, 7, 9],
     dropout=0,
     save=False,
     log=False,
