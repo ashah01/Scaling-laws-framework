@@ -6,7 +6,7 @@ import math
 
 class DataVisualizer:
     def __init__(self, folder):
-        self.config = {"batch_size": 0, "lr": 1, "width": 2, "depth": 3, "params": 4, "dropout": 5, "loss": 6, "error": 7, "time": 8, "epochs": 9}
+        self.config = {"batch_size": 0, "lr": 1, "wd": 2, "width": 3, "depth": 4, "params": 5, "dropout": 6, "loss": 7, "error": 8, "time": 9, "epochs": 10}
         self.folder = folder
         self.run = []
     

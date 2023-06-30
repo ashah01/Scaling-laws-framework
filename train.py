@@ -37,8 +37,6 @@ testset = torchvision.datasets.CIFAR10(
 
 def train(**kwargs):
     subdir = os.path.join(f"./observations/{kwargs['name']}", kwargs["folder"])
-    if not os.path.exists(subdir):
-        os.makedirs(subdir)
 
     trainloader = torch.utils.data.DataLoader(
         trainset, batch_size=kwargs["batch_size"], shuffle=True
@@ -121,7 +119,7 @@ def train(**kwargs):
     if kwargs["log"]:
         with open(f"{subdir}/analytics.txt", "a") as f:
             f.write(
-                f"batch size: {kwargs['batch_size']}, lr: {kwargs['lr']}, hidden dim: {kwargs['hidden_dim']}, depth: {kwargs['depth']}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {kwargs['dropout']}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}, epochs: {kwargs['epochs']}\n"
+                f"batch size: {kwargs['batch_size']}, lr: {kwargs['lr']}, wd: {kwargs['wd']}, hidden dim: {kwargs['hidden_dim']}, depth: {kwargs['depth']}, params: {sum([p.numel() for p in net.parameters()])}, dropout: {kwargs['dropout']}, loss: {min(avg_test_losses)}, error %: {running_sum / len(testset)}, time: {time_end - time_start}, epochs: {kwargs['epochs']}\n"
             )
             f.close()
 
@@ -129,9 +127,17 @@ def train(**kwargs):
 def recursive_call(**args):
     assert type(args["name"]) != list
     assert type(args["folder"]) != list
+    subdir = os.path.join(f"./observations/{args['name']}", args["folder"])
+    if not os.path.exists(subdir):
+        os.makedirs(subdir)
+        open(subdir + "/analytics.txt", "a").close()
     search_space = dict(filter(lambda x: type(x[1]) == list, args.items()))
     constant = dict(filter(lambda x: type(x[1]) != list, args.items()))
-    call_combinations(search_space, constant, train)
+    import IPython; IPython.embed()
+    if search_space:
+        call_combinations(search_space, constant, train)
+    else:
+        train(**constant)
 
 
 def call_combinations(dictionary, constant, function):
@@ -139,10 +145,10 @@ def call_combinations(dictionary, constant, function):
     values = dictionary.values()
     combinations = list(itertools.product(*values))
 
-    combinations_todo = prune_combinations(
+    combinations = prune_combinations(
         combinations, f"{constant['name']}/{constant['folder']}", keys
     )
-    for combo in combinations_todo:
+    for combo in combinations:
         function_args = dict(zip(keys, combo))
         function(**constant, **function_args)
 
@@ -150,6 +156,8 @@ def call_combinations(dictionary, constant, function):
 def prune_combinations(combos, dir, k):
     dv = DataVisualizer(dir)
     dv.load_data(lambda x: x)
+    if not dv.run:
+        return combos
     indices = itemgetter(*k)(dv.config)
     final_run = itemgetter(*indices)(dv.run[-1])
     pruned = delete_items_preceding(combos, final_run)
@@ -169,12 +177,12 @@ recursive_call(
     name="ResNet",
     epochs=50,
     batch_size=128,
-    lr=[0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001],
-    wd=0.0001,
+    lr=0.01,
+    wd=1e-4,
     hidden_dim=16,
-    depth=[2, 3, 5, 7, 9],
+    depth=2,
     dropout=0,
     save=False,
     log=False,
-    folder="adamw_lr",
+    folder="wd_and_epochs",
 )
