@@ -142,7 +142,7 @@ def call_combinations(dictionary, constant, function, new_flag):
     keys = dictionary.keys()
     values = dictionary.values()
     combinations = list(itertools.product(*values))
-    import IPython; IPython.embed()
+
     if not new_flag:
         combinations = prune_combinations(
             combinations, f"{constant['name']}/{constant['folder']}", keys
