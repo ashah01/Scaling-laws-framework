@@ -172,14 +172,14 @@ def delete_items_preceding(lst, value):
 # polymorphism implemented through arrays
 recursive_call(
     name="ResNet",
-    epochs=[50, 70],
+    epochs=50,
     batch_size=128,
     lr=0.01,
-    wd=[0.0001, 0.0003, 0.0005],
+    wd=[0.0001, 0.0003, 0.0005, 0.00005, 0.00007],
     hidden_dim=16,
     depth=[2, 3, 5, 7, 9],
     dropout=0,
     save=False,
     log=True,
-    folder="wd_and_epochs",
+    folder="wd_sweep",
 )

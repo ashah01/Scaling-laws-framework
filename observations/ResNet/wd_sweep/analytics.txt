@@ -1,0 +1,5 @@
+batch size: 128, lr: 0.01, wd: 0.0001, hidden dim: 16, depth: 2, params: 177738, dropout: 0, loss: 0.6696466033971762, error %: 0.2266, time: 1182, epochs: 50
+batch size: 128, lr: 0.01, wd: 0.0001, hidden dim: 16, depth: 3, params: 275178, dropout: 0, loss: 0.6533762635309485, error %: 0.2222, time: 1227, epochs: 50
+batch size: 128, lr: 0.01, wd: 0.0001, hidden dim: 16, depth: 5, params: 470058, dropout: 0, loss: 0.635623314712621, error %: 0.2164, time: 1354, epochs: 50
+batch size: 128, lr: 0.01, wd: 0.0001, hidden dim: 16, depth: 7, params: 664938, dropout: 0, loss: 0.6278765948512887, error %: 0.2075, time: 1485, epochs: 50
+batch size: 128, lr: 0.01, wd: 0.0001, hidden dim: 16, depth: 9, params: 859818, dropout: 0, loss: 0.6223776355574403, error %: 0.2098, time: 1637, epochs: 50
