@@ -149,6 +149,7 @@ def call_combinations(dictionary, constant, function, new_flag):
         )
     for combo in combinations:
         function_args = dict(zip(keys, combo))
+        print("Starting:", function_args)
         function(**constant, **function_args)
 
 
@@ -175,7 +176,7 @@ recursive_call(
     epochs=50,
     batch_size=128,
     lr=0.01,
-    wd=[0.0001, 0.0003, 0.0005, 0.00005, 0.00007],
+    wd=[0.0001, 0.0003, 0.0005, 5e-5, 7e-5],
     hidden_dim=16,
     depth=[2, 3, 5, 7, 9],
     dropout=0,
