@@ -128,26 +128,25 @@ def recursive_call(**args):
     assert type(args["name"]) != list
     assert type(args["folder"]) != list
     subdir = os.path.join(f"./observations/{args['name']}", args["folder"])
+    new_flag = False
     if not os.path.exists(subdir):
+        new_flag = True
         os.makedirs(subdir)
         open(subdir + "/analytics.txt", "a").close()
     search_space = dict(filter(lambda x: type(x[1]) == list, args.items()))
     constant = dict(filter(lambda x: type(x[1]) != list, args.items()))
-    import IPython; IPython.embed()
-    if search_space:
-        call_combinations(search_space, constant, train)
-    else:
-        train(**constant)
+    call_combinations(search_space, constant, train, new_flag)
 
 
-def call_combinations(dictionary, constant, function):
+def call_combinations(dictionary, constant, function, new_flag):
     keys = dictionary.keys()
     values = dictionary.values()
     combinations = list(itertools.product(*values))
-
-    combinations = prune_combinations(
-        combinations, f"{constant['name']}/{constant['folder']}", keys
-    )
+    import IPython; IPython.embed()
+    if not new_flag:
+        combinations = prune_combinations(
+            combinations, f"{constant['name']}/{constant['folder']}", keys
+        )
     for combo in combinations:
         function_args = dict(zip(keys, combo))
         function(**constant, **function_args)
@@ -156,8 +155,6 @@ def call_combinations(dictionary, constant, function):
 def prune_combinations(combos, dir, k):
     dv = DataVisualizer(dir)
     dv.load_data(lambda x: x)
-    if not dv.run:
-        return combos
     indices = itemgetter(*k)(dv.config)
     final_run = itemgetter(*indices)(dv.run[-1])
     pruned = delete_items_preceding(combos, final_run)
@@ -175,14 +172,14 @@ def delete_items_preceding(lst, value):
 # polymorphism implemented through arrays
 recursive_call(
     name="ResNet",
-    epochs=50,
+    epochs=[50, 70],
     batch_size=128,
     lr=0.01,
-    wd=1e-4,
+    wd=[0.0001, 0.0003, 0.0005],
     hidden_dim=16,
-    depth=2,
+    depth=[2, 3, 5, 7, 9],
     dropout=0,
     save=False,
-    log=False,
+    log=True,
     folder="wd_and_epochs",
 )
