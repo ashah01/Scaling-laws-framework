@@ -13,7 +13,7 @@ class DataVisualizer:
     def load_data(self, filter_):
         with open(f"observations/{self.folder}/analytics.txt", "r") as file:
             data = file.readlines()
-        run = [re.findall(r"[-+]?\d*\.\d+|\d+", line) for line in data]
+        run = [re.findall(r'[-+]?\d*\.\d+|\d+e[-+]?\d+|\b[-+]?\d+\b', line) for line in data]
         for i in range(len(run)):
             for j in range(len(run[0])):
                 if run[i][j].isdigit():
