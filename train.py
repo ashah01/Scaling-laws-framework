@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 import torch.optim as optim
+import torch.utils.data
 from tqdm import tqdm
 import pickle
 import os
@@ -11,6 +12,7 @@ import itertools
 import model
 from plot import DataVisualizer
 from operator import itemgetter
+
 
 torch.manual_seed(0)
 
@@ -114,7 +116,7 @@ def train(**kwargs):
             f"{subdir}/test_scores_{identity_}",
             "wb",
         ) as f:
-            pickle.dump(test_scores, f)
+            pickle.dump(avg_test_losses, f)
             f.close()
     if kwargs["log"]:
         with open(f"{subdir}/analytics.txt", "a") as f:
