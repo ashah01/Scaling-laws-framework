@@ -12,7 +12,7 @@ import model
 from plot import DataVisualizer
 from operator import itemgetter
 
-torch.manual_seed(1)
+torch.manual_seed(0)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -156,6 +156,8 @@ def call_combinations(dictionary, constant, function, new_flag):
 def prune_combinations(combos, dir, k):
     dv = DataVisualizer(dir)
     dv.load_data(lambda x: x)
+    if not k:
+        return combos
     indices = itemgetter(*k)(dv.config)
     final_run = itemgetter(*indices)(dv.run[-1])
     pruned = delete_items_preceding(combos, final_run)
@@ -176,9 +178,9 @@ recursive_call(
     epochs=50,
     batch_size=128,
     lr=0.01,
-    wd=[0.0001, 0.0003, 0.0005, 5e-5, 7e-5],
+    wd=3e-4,
     hidden_dim=16,
-    depth=[2, 3, 5, 7, 9],
+    depth=7,
     dropout=0,
     save=False,
     log=True,
