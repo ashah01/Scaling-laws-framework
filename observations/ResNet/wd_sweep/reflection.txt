@@ -1,0 +1,15 @@
+2023/07/03
+
+Changing the seed from 1 to 0 resulted in the dramatic improvement of trial 
+(depth 9, wd 5e-4) - so much so that it went from breaking the functional form
+to making it steeper! Now, the actual *research* part consists of 
+understanding why it's [not] working, and fixing it when it's broken. Pulling
+these threads is what allows a highly productive researcher at OpenAI to
+identify and eliminate any irregularities, ensuring stability in results,
+thereby producing a highly predictive functional form.
+
+The answer lies in the learning curves of the variant trials. We must plot
+the experiment in wandb (possibly including telemetry i.e. gradient norms), 
+and analyze the results to understand the cause of variation. In doing so, we
+can systematically construct a model with good scaling laws in addition to
+simply executing the research well.
