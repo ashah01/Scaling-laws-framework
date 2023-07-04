@@ -1,4 +1,5 @@
 import torch
+import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
@@ -6,9 +7,7 @@ import torch.optim as optim
 import torch.utils.data
 from tqdm import tqdm
 import wandb
-import itertools
-import model
-
+from model import ResNet
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -31,35 +30,30 @@ testset = torchvision.datasets.CIFAR10(
 )
 
 
-def train(**kwargs):
-    wandb.init(
-        project="resnet-scaling-laws",
-        config=kwargs, 
-        reinit=True, 
-    ) 
-
-    torch.manual_seed(kwargs["seed"])
+def main():
+    wandb.init(project='resnet-scaling-laws')
+    torch.manual_seed(wandb.config.seed)
 
     trainloader = torch.utils.data.DataLoader(
-        trainset, batch_size=kwargs["batch_size"], shuffle=True
+        trainset, batch_size=wandb.config.batch_size, shuffle=True
     )
     testloader = torch.utils.data.DataLoader(
-        testset, batch_size=kwargs["batch_size"], shuffle=False
+        testset, batch_size=wandb.config.batch_size, shuffle=False
     )
 
-    net = getattr(model, kwargs["name"])(kwargs["hidden_dim"], kwargs["depth"])
+    net = ResNet(wandb.config.hidden_dim, wandb.config.depth)
     net = net.to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(
-        net.parameters(), lr=kwargs["lr"], weight_decay=kwargs["wd"]
+        net.parameters(), lr=wandb.config.lr, weight_decay=wandb.config.wd
     )
     scheduler = optim.lr_scheduler.LinearLR(
         optimizer,
         start_factor=1,
         end_factor=0,
-        total_iters=len(trainloader) * kwargs["epochs"],
+        total_iters=len(trainloader) * wandb.config.epochs,
     )
-    for _ in range(kwargs["epochs"]):
+    for _ in range(wandb.config.epochs):
         for data in tqdm(trainloader):
             inputs, labels = data
             inputs = inputs.to(device)
@@ -88,37 +82,26 @@ def train(**kwargs):
 
         wandb.log({"test/error_rate": (running_sum / len(testset))})
 
-    wandb.finish()
+# Define the hyperparameter lists
+hyperparameter_lists = {
+    'epochs': 50,
+    'batch_size': 128,
+    'lr': 0.01,
+    'wd': 5e-4,
+    'hidden_dim': 16,
+    'dropout': 0,
+    'depth': [2, 3, 5, 7, 9],
+    'seed': [0, 1],
+}
 
-def recursive_call(**args):
-    assert type(args["name"]) != list
-    assert type(args["folder"]) != list
-    search_space = dict(filter(lambda x: type(x[1]) == list, args.items()))
-    constant = dict(filter(lambda x: type(x[1]) != list, args.items()))
-    call_combinations(search_space, constant, train)
+sweep_configuration = {
+ "name": "wd5e-4 across seeds",
+ "metric": {"name": "test/loss", "goal": "minimize"},
+ "method": "grid",
+ "parameters": hyperparameter_lists,
+}
 
+sweep_id = wandb.sweep(sweep=sweep_configuration, project="resnet-scaling-laws")
 
-def call_combinations(dictionary, constant, function):
-    keys = dictionary.keys()
-    values = dictionary.values()
-    combinations = list(itertools.product(*values))
-
-    for combo in combinations:
-        function_args = dict(zip(keys, combo))
-        function(**constant, **function_args)
-
-
-
-# polymorphism implemented through arrays
-recursive_call(
-    name="ResNet",
-    epochs=50,
-    batch_size=128,
-    lr=0.01,
-    wd=5e-4,
-    hidden_dim=16,
-    depth=[2, 3, 5, 7, 9],
-    dropout=0,
-    seed=[0, 1],
-    folder="wd_sweep",
-)
+# run the sweep
+wandb.agent(sweep_id, function=main)
