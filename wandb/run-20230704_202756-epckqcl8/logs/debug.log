@@ -1,0 +1,26 @@
+2023-07-04 20:27:56,847 INFO    MainThread:46125 [wandb_setup.py:_flush():76] Current SDK version is 0.15.4
+2023-07-04 20:27:56,848 INFO    MainThread:46125 [wandb_setup.py:_flush():76] Configure stats pid to 46125
+2023-07-04 20:27:56,848 INFO    MainThread:46125 [wandb_setup.py:_flush():76] Loading settings from /Users/arnavshah/.config/wandb/settings
+2023-07-04 20:27:56,848 INFO    MainThread:46125 [wandb_setup.py:_flush():76] Loading settings from /Users/arnavshah/Documents/Code/MNIST-scaling-laws/wandb/settings
+2023-07-04 20:27:56,848 INFO    MainThread:46125 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-07-04 20:27:56,848 INFO    MainThread:46125 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2023-07-04 20:27:56,848 INFO    MainThread:46125 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'train.py', 'program': '/Users/arnavshah/Documents/Code/MNIST-scaling-laws/train.py'}
+2023-07-04 20:27:56,848 INFO    MainThread:46125 [wandb_init.py:_log_setup():507] Logging user logs to /Users/arnavshah/Documents/Code/MNIST-scaling-laws/wandb/run-20230704_202756-epckqcl8/logs/debug.log
+2023-07-04 20:27:56,848 INFO    MainThread:46125 [wandb_init.py:_log_setup():508] Logging internal logs to /Users/arnavshah/Documents/Code/MNIST-scaling-laws/wandb/run-20230704_202756-epckqcl8/logs/debug-internal.log
+2023-07-04 20:27:56,848 INFO    MainThread:46125 [wandb_init.py:init():547] calling init triggers
+2023-07-04 20:27:56,849 INFO    MainThread:46125 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'name': 'ResNet', 'epochs': 50, 'batch_size': 128, 'lr': 0.01, 'wd': 0.0005, 'hidden_dim': 16, 'depth': 9, 'dropout': 0, 'seed': 1, 'folder': 'wd_sweep'}
+2023-07-04 20:27:56,849 INFO    MainThread:46125 [wandb_init.py:init():596] starting backend
+2023-07-04 20:27:56,849 INFO    MainThread:46125 [wandb_init.py:init():600] setting up manager
+2023-07-04 20:27:56,854 INFO    MainThread:46125 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=spawn,fork,forkserver, using: spawn
+2023-07-04 20:27:56,859 INFO    MainThread:46125 [wandb_init.py:init():606] backend started and connected
+2023-07-04 20:27:56,865 INFO    MainThread:46125 [wandb_init.py:init():703] updated telemetry
+2023-07-04 20:27:56,908 INFO    MainThread:46125 [wandb_init.py:init():736] communicating run to backend with 60.0 second timeout
+2023-07-04 20:27:57,160 INFO    MainThread:46125 [wandb_run.py:_on_init():2176] communicating current version
+2023-07-04 20:27:57,281 INFO    MainThread:46125 [wandb_run.py:_on_init():2185] got version response 
+2023-07-04 20:27:57,281 INFO    MainThread:46125 [wandb_init.py:init():787] starting run threads in backend
+2023-07-04 20:28:00,526 INFO    MainThread:46125 [wandb_run.py:_console_start():2155] atexit reg
+2023-07-04 20:28:00,526 INFO    MainThread:46125 [wandb_run.py:_redirect():2010] redirect: SettingsConsole.WRAP_RAW
+2023-07-04 20:28:00,526 INFO    MainThread:46125 [wandb_run.py:_redirect():2075] Wrapping output streams.
+2023-07-04 20:28:00,527 INFO    MainThread:46125 [wandb_run.py:_redirect():2100] Redirects installed.
+2023-07-04 20:28:00,527 INFO    MainThread:46125 [wandb_init.py:init():828] run started, returning control to user process
