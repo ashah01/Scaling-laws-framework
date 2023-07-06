@@ -106,12 +106,12 @@ hyperparameter_lists = {
         'values': [2, 3, 5, 7, 9]
     },
     'seed': {
-        'values': [0, 1]
+        'value': 3407
     }
 }
 
 sweep_configuration = {
- "name": "wd5e-4 across seeds",
+ "name": "final regime depth scaling",
  "metric": {"name": "test/loss", "goal": "minimize"},
  "method": "grid",
  "parameters": hyperparameter_lists,
