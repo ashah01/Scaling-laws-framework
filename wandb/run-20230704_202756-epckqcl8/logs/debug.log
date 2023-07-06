@@ -24,3 +24,10 @@ config: {'name': 'ResNet', 'epochs': 50, 'batch_size': 128, 'lr': 0.01, 'wd': 0.
 2023-07-04 20:28:00,526 INFO    MainThread:46125 [wandb_run.py:_redirect():2075] Wrapping output streams.
 2023-07-04 20:28:00,527 INFO    MainThread:46125 [wandb_run.py:_redirect():2100] Redirects installed.
 2023-07-04 20:28:00,527 INFO    MainThread:46125 [wandb_init.py:init():828] run started, returning control to user process
+2023-07-04 21:50:40,115 INFO    MainThread:46125 [wandb_run.py:_finish():1890] finishing run ashah01/resnet-scaling-laws/epckqcl8
+2023-07-04 21:50:40,116 INFO    MainThread:46125 [wandb_run.py:_atexit_cleanup():2124] got exitcode: 0
+2023-07-04 21:50:40,118 INFO    MainThread:46125 [wandb_run.py:_restore():2107] restore
+2023-07-04 21:50:40,118 INFO    MainThread:46125 [wandb_run.py:_restore():2113] restore done
+2023-07-04 21:50:45,695 INFO    MainThread:46125 [wandb_run.py:_footer_history_summary_info():3467] rendering history
+2023-07-04 21:50:45,697 INFO    MainThread:46125 [wandb_run.py:_footer_history_summary_info():3499] rendering summary
+2023-07-04 21:50:45,711 INFO    MainThread:46125 [wandb_run.py:_footer_sync_info():3426] logging synced files

@@ -13,3 +13,37 @@ the experiment in wandb (possibly including telemetry i.e. gradient norms),
 and analyze the results to understand the cause of variation. In doing so, we
 can systematically construct a model with good scaling laws in addition to
 simply executing the research well.
+
+Observations
+----
+
+Seed 1
+
+
+test/error_rate at epoch 50 seems to show the expected results. The error
+rates decrease as depth is scaled: 22.6%, 22%, 21.9%, 21.7%, 20.6%, for 2, 3,
+5, 7, 9.
+
+It's worth noting that the higher the depth, the worse the first epoch's error
+rate is. This is significantly exacerbated for depth 9. Though, as should
+logically follow based on the end result, the acceleration of the improvement
+of the higher depth's error rate is also greater.
+
+After computing a running average smoothing on the test/loss graph, the
+expected trend is shown towards the end of training. Loss scores are 0.74,
+0.61, 0.55, 0.53, 0.53 for depths 2, 3, 5, 7, 9. Again, deeper architectures
+start off worse and progressively get better through the duration of training.
+
+Seed 0
+
+test/error_rate similarly starts out with worse performance for deeper 
+architectures. Unlike seed 1, however, depth 9 is not a clear winner by the
+end of training. In fact, on epoch 50, depth 7 actually performs better. This
+doesn't necessarily imply that depth 7 is overall superior to depth 9, 
+however, as the two architectures seem to be neck-in-neck towards the end of
+training.
+
+It turns out test/error_rate may just be noise after all. test/loss reflects
+the common trend in which loss starts out worse but inevitably improves as 
+depth is scaled (and crucially, at a faster rate than shallower counterparts).
+
