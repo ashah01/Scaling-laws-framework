@@ -110,16 +110,15 @@ def call_combinations(dictionary, constant, function):
 
 
 # polymorphism implemented through arrays
-#recursive_call(
-#    name="ResNet",
-#    epochs=50,
-#    batch_size=128,
-#    lr=0.01,
-#    wd=5e-4,
-#    hidden_dim=16,
-#    depth=[2, 3, 5, 7, 9],
-#    dropout=0,
-#    seed=[0, 1],
-#    folder="wd_sweep",
-#)
-train(name="ResNet", epochs=50, batch_size=128, lr=0.01, wd=5e-4, hidden_dim=16, depth=9, dropout=0, seed=1, folder="wd_sweep")
+recursive_call(
+    name="ResNet",
+    epochs=50,
+    batch_size=128,
+    lr=0.01,
+    wd=5e-4,
+    hidden_dim=16,
+    depth=[2, 7],
+    dropout=0,
+    seed=3207,
+    folder="wd_sweep",
+)
