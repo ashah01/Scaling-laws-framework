@@ -22,5 +22,12 @@ What factors could lead to this flatlining behaviour?
 - Insufficient number of epochs for depths to diverge
 - Vanishing gradients
 - Insufficient quantity of data
+- Similarly expressive model (doubtful)
+
+![](grad_graph.png)
+Aside from a turbulent beginning, there doens't seem to be any exploding (and much less) vanishing gradients.
+
+![](increased_epochs_graph.png)
+There doesn't appear to be any noticeable difference in performance across varying epochs. The flatline effect is very real.
 
 ## Solution
