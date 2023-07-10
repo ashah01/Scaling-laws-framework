@@ -93,7 +93,7 @@ hyperparameter_lists = {
         'value': 128
     },
     'lr': {
-        'values': 0.01
+        'value': 0.01
     },
     'wd': {
         'value': 5e-4
