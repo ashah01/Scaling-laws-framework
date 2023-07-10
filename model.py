@@ -80,5 +80,5 @@ class ResNet(nn.Module):
 # model = ResNet(16, 3).to(device)
 
 if __name__ == "__main__":
-    # model = ResNet(16, 2)
+    model = ResNet(16, 2)
     import IPython; IPython.embed()

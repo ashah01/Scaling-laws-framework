@@ -93,7 +93,7 @@ hyperparameter_lists = {
         'value': 128
     },
     'lr': {
-        'values': [0.01, 0.001]
+        'values': 0.01
     },
     'wd': {
         'value': 5e-4
@@ -105,7 +105,7 @@ hyperparameter_lists = {
         'value': 0
     },
     'depth': {
-        'values': [5, 9]
+        'values': [3, 6, 9, 12, 15]
     },
     'seed': {
         'value': 10
@@ -113,7 +113,7 @@ hyperparameter_lists = {
 }
 
 sweep_configuration = {
- "name": "New seed (pray to gods of RNG)",
+ "name": "Spaced out depth scaling",
  "metric": {"name": "test/loss", "goal": "minimize"},
  "method": "grid",
  "parameters": hyperparameter_lists,
