@@ -42,8 +42,9 @@ There doesn't appear to be any change in performance. The losss gap between dept
 
 Another possibility is that it's just trapped in a local minimum. This is unlikely, but still worth a shot to try out. We can set an experiment up to determine this pretty easily by just changing the seed (and optionally the learning rate as well).
 
-Another possibility is that the generalization power of the model is limited. This definitely isn't true theoretically of ResNet, but could be indicative of bugs in my actual implementation. Try overfitting on one image.
+![](seed_graph.png)
 
-Generalization seems to be working with the caveat that gradient clipping induces spikes on smaller batches (explanation here is that since the optimization surface is super easy, you don't need to put a cap on the size of your gradient)
+This actually turned out to be quite fruitful. The terrible first test loss from this model seems to have disappeared, and depth 9 is consistently better than depth 5 (albeit to a marginal extent). Now, it's worth determining if this is true as we scale up. Rerun the depth scaling experiment using this configuration, but with more spaced out values.
+
 
 ## Solution
