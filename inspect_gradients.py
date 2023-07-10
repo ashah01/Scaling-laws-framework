@@ -18,6 +18,7 @@ transform = transforms.Compose(
         ),  # Random crop of size 32x32 with padding of 4 pixels
         transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
         transforms.ToTensor(),  # Convert the image to a tensor
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ]
 )
 
@@ -65,6 +66,7 @@ def main(config=None):
                 loss = criterion(outputs, labels)
                 wandb.log({"train/loss": loss.item()})
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
                 total_norm = 0
                 for p in net.parameters():
                     param_norm = p.grad.detach().data.norm(2)
@@ -117,7 +119,7 @@ hyperparameter_lists = {
 }
 
 sweep_configuration = {
- "name": "Grad norm across depth",
+ "name": "Gradient clipping + image normalization",
  "metric": {"name": "test/loss", "goal": "minimize"},
  "method": "grid",
  "parameters": hyperparameter_lists,

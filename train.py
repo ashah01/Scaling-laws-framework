@@ -19,6 +19,7 @@ transform = transforms.Compose(
         ),  # Random crop of size 32x32 with padding of 4 pixels
         transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
         transforms.ToTensor(),  # Convert the image to a tensor
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ]
 )
 

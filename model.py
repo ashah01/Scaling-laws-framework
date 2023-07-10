@@ -1,34 +1,6 @@
 import torch
 import torch.nn as nn
 
-
-
-"""
-
-import torchvision
-import torchvision.transforms as transforms
-
-transform = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),  # Random crop of size 32x32 with padding of 4 pixels
-    transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
-    transforms.ToTensor()  # Convert the image to a tensor
-])
-
-trainset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=True, download=True, transform=transform)
-
-testset = torchvision.datasets.CIFAR10(root="./data/CIFAR10", train=False, download=True, transform=transform)
-
-trainloader = torch.utils.data.DataLoader(
-    trainset, batch_size=32, shuffle=True
-)
-testloader = torch.utils.data.DataLoader(
-    testset, batch_size=32, shuffle=False
-)
-
-sample = next(iter(trainloader))[0]
-
-"""
-
 def init_params(m):
     if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
         nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
@@ -108,5 +80,5 @@ class ResNet(nn.Module):
 # model = ResNet(16, 3).to(device)
 
 if __name__ == "__main__":
-    model = ResNet(16, 1)
+    # model = ResNet(16, 2)
     import IPython; IPython.embed()
