@@ -18,6 +18,7 @@ transform = transforms.Compose(
         ),  # Random crop of size 32x32 with padding of 4 pixels
         transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
         transforms.ToTensor(),  # Convert the image to a tensor
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ]
 )
 
@@ -65,6 +66,7 @@ def main(config=None):
                 loss = criterion(outputs, labels)
                 wandb.log({"train/loss": loss.item()})
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
                 optimizer.step()
                 scheduler.step()
 
@@ -91,7 +93,7 @@ hyperparameter_lists = {
         'value': 128
     },
     'lr': {
-        'value': 0.01
+        'values': [0.01, 0.001]
     },
     'wd': {
         'value': 5e-4
@@ -103,15 +105,15 @@ hyperparameter_lists = {
         'value': 0
     },
     'depth': {
-        'values': [2, 3, 5, 7, 9]
+        'values': [5, 9]
     },
     'seed': {
-        'value': 3407
+        'value': 10
     }
 }
 
 sweep_configuration = {
- "name": "final regime depth scaling",
+ "name": "New seed (pray to gods of RNG)",
  "metric": {"name": "test/loss", "goal": "minimize"},
  "method": "grid",
  "parameters": hyperparameter_lists,
