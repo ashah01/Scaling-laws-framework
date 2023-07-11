@@ -18,7 +18,7 @@ transform = transforms.Compose(
         ),  # Random crop of size 32x32 with padding of 4 pixels
         transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
         transforms.ToTensor(),  # Convert the image to a tensor
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ]
 )
 
@@ -84,39 +84,24 @@ def main(config=None):
 
             wandb.log({"test/error_rate": (running_sum / len(testset)), "epoch": epoch})
 
+
 # Define the hyperparameter lists
 hyperparameter_lists = {
-    'epochs': {
-        'value': 50
-    },
-    'batch_size': {
-        'value': 128
-    },
-    'lr': {
-        'value': 0.01
-    },
-    'wd': {
-        'value': 5e-4
-    },
-    'hidden_dim': {
-        'value': 16
-    },
-    'dropout': {
-        'value': 0
-    },
-    'depth': {
-        'values': [3, 6, 9, 12, 15]
-    },
-    'seed': {
-        'value': 10
-    }
+    "epochs": {"value": 50},
+    "batch_size": {"value": 128},
+    "lr": {"value": 0.01},
+    "wd": {"value": 5e-4},
+    "hidden_dim": {"value": 16},
+    "dropout": {"value": 0},
+    "depth": {"values": [3, 6, 9, 12, 15]},
+    "seed": {"value": 10},
 }
 
 sweep_configuration = {
- "name": "Spaced out depth scaling",
- "metric": {"name": "test/loss", "goal": "minimize"},
- "method": "grid",
- "parameters": hyperparameter_lists,
+    "name": "Spaced out depth scaling",
+    "metric": {"name": "test/loss", "goal": "minimize"},
+    "method": "grid",
+    "parameters": hyperparameter_lists,
 }
 
 sweep_id = wandb.sweep(sweep=sweep_configuration, project="resnet-scaling-laws")
