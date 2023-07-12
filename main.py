@@ -42,7 +42,7 @@ testset = torchvision.datasets.CIFAR10(
 
 
 def loop(config=None):
-    with wandb.init(config=config, mode="disabled"):
+    with wandb.init(config=config):
         trainloader = torch.utils.data.DataLoader(
             trainset, batch_size=wandb.config.batch_size, shuffle=True
         )
