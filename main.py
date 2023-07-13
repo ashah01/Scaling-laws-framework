@@ -112,8 +112,8 @@ hyperparameter_lists = {
     "batch_size": {"value": 128},
     "lr": {"value": 0.1},
     "wd": {"value": 5e-4},
-    "hidden_dim": {"value": 16},
-    "depth": {"values": [3, 6, 9, 12, 15]},
+    "hidden_dim": {"values": [10, 16, 22]},
+    "depth": {"values": [3, 6, 9]},
 }
 
 sweep_configuration = {
