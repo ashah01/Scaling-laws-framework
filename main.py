@@ -42,7 +42,7 @@ testset = torchvision.datasets.CIFAR10(
 
 
 def loop(config=None):
-    with wandb.init(config=config):
+    with wandb.init(config=config, project="resnet-scaling-laws"):
         trainloader = torch.utils.data.DataLoader(
             trainset, batch_size=wandb.config.batch_size, shuffle=True
         )
@@ -106,24 +106,47 @@ def loop(config=None):
                         }
                     )
 
-
-hyperparameter_lists = {
-    "epochs": {"value": 50},
-    "batch_size": {"value": 128},
-    "lr": {"value": 0.1},
-    "wd": {"value": 5e-4},
-    "hidden_dim": {"values": [10, 16, 22]},
-    "depth": {"values": [3, 6, 9]},
+hyperparameter_config = {
+    "epochs": 50,
+    "batch_size": 128,
+    "lr": 0.1,
+    "wd": 5e-4,
 }
 
-sweep_configuration = {
-    "name": "Spaced out depth scaling",
-    "metric": {"name": "test/error %", "goal": "minimize"},
-    "method": "grid",
-    "parameters": hyperparameter_lists,
-}
+# 500k combos
+combos_500k = [
+    (41, 1), # 41
+    (27, 2), # 13.5
+    (22, 3), # 7.33
+    (19, 4), # 4.75
+    (11, 11), # 1
+    (9, 14), # 0.64
+    (8, 21), # 0.38
+    (5, 53), # 0.09
+]
 
-sweep_id = wandb.sweep(sweep=sweep_configuration, project="resnet-scaling-laws")
+combos_1m = [ # d_model / n_layer
+    (8, 41), # 0.2
+    (10, 27), # 0.37
+    (12, 19), # 0.63
+    (14, 14), # 1
+    (24, 5), # 4.8
+    (27, 4), # 6.75
+    (31, 3), # 10.33
+    (39, 2), # 19.5
+    (58, 1), # 58
+]
 
-# run the sweep
-wandb.agent(sweep_id, function=loop)
+hyperparameter_config["num_params"] = 500000
+for w, d in combos_500k:
+    hyperparameter_config["hidden_dim"] = w
+    hyperparameter_config["depth"] = d
+
+    loop(hyperparameter_config)
+
+hyperparameter_config["num_params"] = 1000000
+for w, d in combos_1m:
+    hyperparameter_config["hidden_dim"] = w
+    hyperparameter_config["depth"] = d
+
+    loop(hyperparameter_config)
