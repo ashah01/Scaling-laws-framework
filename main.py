@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 
 import wandb
 
+import os
+
 from models.resnet import ResNet
 
 torch.manual_seed(0)
@@ -62,8 +64,29 @@ def loop(config=None):
             optimizer, T_max=wandb.config.epochs * len(trainloader)
         )
 
-        for epoch in range(wandb.config.epochs):
+        epoch_subtract = 0
+        if os.path.exists("./last_checkpoint.pt"):
+            checkpoint = torch.load("./last_checkpoint.pt")
+            net.load_state_dict(checkpoint["model_state_dict"])
+            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+            epoch_subtract = checkpoint["epoch"] - 1
+
+        for epoch in range(wandb.config.epochs - epoch_subtract):
             net.train()
+
+            if (epoch + 1) % 5 == 0:
+                # checkpoint
+                torch.save(
+                    {
+                        "epoch": epoch + 1,
+                        "model_state_dict": net.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "scheduler_state_dict": scheduler.state_dict(),
+                    },
+                    "./last_checkpoint.pt",
+                )
+
             for batch_idx, (inputs, targets) in enumerate(trainloader):
                 inputs, targets = inputs.to(device), targets.to(device)
                 optimizer.zero_grad()
@@ -106,6 +129,9 @@ def loop(config=None):
                         }
                     )
 
+        os.remove("./last_checkpoint.pt")
+
+
 hyperparameter_config = {
     "epochs": 50,
     "batch_size": 128,
@@ -113,38 +139,17 @@ hyperparameter_config = {
     "wd": 5e-4,
 }
 
-# 500k combos
-combos_500k = [
-    (41, 1), # 41
-    (27, 2), # 13.5
-    (22, 3), # 7.33
-    (19, 4), # 4.75
-    (11, 11), # 1
-    (9, 14), # 0.64
-    (8, 21), # 0.38
-    (5, 53), # 0.09
+
+combos_1m = [  # d_model / n_layer
+    # (16, 32),
+    # (20, 20),
+    (35, 7),  # interrupted
+    (46, 4),
+    (54, 3),
+    (67, 2),
 ]
 
-combos_1m = [ # d_model / n_layer
-    (8, 41), # 0.2
-    (10, 27), # 0.37
-    (12, 19), # 0.63
-    (14, 14), # 1
-    (24, 5), # 4.8
-    (27, 4), # 6.75
-    (31, 3), # 10.33
-    (39, 2), # 19.5
-    (58, 1), # 58
-]
-
-hyperparameter_config["num_params"] = 500000
-for w, d in combos_500k:
-    hyperparameter_config["hidden_dim"] = w
-    hyperparameter_config["depth"] = d
-
-    loop(hyperparameter_config)
-
-hyperparameter_config["num_params"] = 1000000
+hyperparameter_config["num_params"] = 3000000
 for w, d in combos_1m:
     hyperparameter_config["hidden_dim"] = w
     hyperparameter_config["depth"] = d
