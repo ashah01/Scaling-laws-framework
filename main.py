@@ -143,7 +143,7 @@ hyperparameter_config = {
 combos_1m = [  # d_model / n_layer
     # (16, 32),
     # (20, 20),
-    (35, 7),  # interrupted
+    # (35, 7),
     (46, 4),
     (54, 3),
     (67, 2),
