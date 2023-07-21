@@ -45,6 +45,10 @@ testset = torchvision.datasets.CIFAR10(
 
 def loop(config=None):
     with wandb.init(config=config, project="resnet-scaling-laws"):
+        wandb.define_metric("train/step")
+        wandb.define_metric("train/*", step_metric="train/step")
+        wandb.define_metric("test/step")
+        wandb.define_metric("test/*", step_metric="test/step")
         trainloader = torch.utils.data.DataLoader(
             trainset, batch_size=wandb.config.batch_size, shuffle=True
         )
@@ -103,9 +107,9 @@ def loop(config=None):
 
                 wandb.log(
                     {
+                        "train/step": epoch * len(trainloader) + batch_idx + 1,
                         "train/loss": loss.item(),
                         "train/error %": 100.0 * (1 - correct / total),
-                        "train/batch_idx": batch_idx,
                     }
                 )
 
@@ -123,9 +127,9 @@ def loop(config=None):
 
                     wandb.log(
                         {
+                            "test/step": epoch * len(testloader) + batch_idx + 1,
                             "test/loss": loss.item(),
                             "test/error %": 100.0 * (1 - correct / total),
-                            "test/batch_idx": batch_idx,
                         }
                     )
 
