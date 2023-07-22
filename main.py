@@ -44,7 +44,7 @@ testset = torchvision.datasets.CIFAR10(
 
 
 def loop(config=None):
-    with wandb.init(config=config, project="resnet-scaling-laws"):
+    with wandb.init(config=config, project="resnet-scaling-laws", resume=True):
         wandb.define_metric("train/step")
         wandb.define_metric("train/*", step_metric="train/step")
         wandb.define_metric("test/step")
@@ -115,6 +115,8 @@ def loop(config=None):
 
             net.eval()
             with torch.no_grad():
+                test_losses = []
+                test_errors = []
                 for batch_idx, (inputs, targets) in enumerate(testloader):
                     inputs, targets = inputs.to(device), targets.to(device)
                     outputs = net(inputs)
@@ -125,13 +127,16 @@ def loop(config=None):
                     total = targets.size(0)
                     correct = predicted.eq(targets).sum().item()
 
-                    wandb.log(
-                        {
-                            "test/step": epoch * len(testloader) + batch_idx + 1,
-                            "test/loss": loss.item(),
-                            "test/error %": 100.0 * (1 - correct / total),
-                        }
-                    )
+                    test_losses.append(loss.item())
+                    test_errors.append(100.0 * (1 - correct / total))
+                wandb.log({
+                    "test/step": epoch * len(testloader) + batch_idx + 1,
+                    "test/loss": sum(test_losses) / len(test_losses),
+                    "test/error %": sum(test_errors) / len(test_errors),
+                    "test/error std": torch.tensor(test_errors).std().item(),
+                    "test/error min": min(test_errors),
+                    "test/error max": max(test_errors),
+                })
 
         os.remove("./last_checkpoint.pt")
 
@@ -141,21 +146,11 @@ hyperparameter_config = {
     "batch_size": 128,
     "lr": 0.1,
     "wd": 5e-4,
+    "hidden_dim": 24,
+    "depth": 5
 }
 
-
-combos_1m = [  # d_model / n_layer
-    # (16, 32),
-    # (20, 20),
-    # (35, 7),
-    (46, 4),
-    (54, 3),
-    (67, 2),
-]
-
-hyperparameter_config["num_params"] = 3000000
-for w, d in combos_1m:
-    hyperparameter_config["hidden_dim"] = w
-    hyperparameter_config["depth"] = d
-
-    loop(hyperparameter_config)
+# for w,d in [(35, 7), (24, 5)]:
+#     hyperparameter_config['hidden_dim'] = w
+#     hyperparameter_config['depth'] = d
+loop(hyperparameter_config)
