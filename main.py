@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 
 import wandb
 
+import os
+
 from models.resnet import ResNet
 
 torch.manual_seed(0)
@@ -42,7 +44,11 @@ testset = torchvision.datasets.CIFAR10(
 
 
 def loop(config=None):
-    with wandb.init(config=config):
+    with wandb.init(config=config, project="resnet-scaling-laws", resume=True):
+        wandb.define_metric("train/step")
+        wandb.define_metric("train/*", step_metric="train/step")
+        wandb.define_metric("test/step")
+        wandb.define_metric("test/*", step_metric="test/step")
         trainloader = torch.utils.data.DataLoader(
             trainset, batch_size=wandb.config.batch_size, shuffle=True
         )
@@ -62,8 +68,29 @@ def loop(config=None):
             optimizer, T_max=wandb.config.epochs * len(trainloader)
         )
 
-        for epoch in range(wandb.config.epochs):
+        epoch_subtract = 0
+        if os.path.exists("./last_checkpoint.pt"):
+            checkpoint = torch.load("./last_checkpoint.pt")
+            net.load_state_dict(checkpoint["model_state_dict"])
+            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+            epoch_subtract = checkpoint["epoch"] - 1
+
+        for epoch in range(wandb.config.epochs - epoch_subtract):
             net.train()
+
+            if (epoch + 1) % 5 == 0:
+                # checkpoint
+                torch.save(
+                    {
+                        "epoch": epoch + 1,
+                        "model_state_dict": net.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "scheduler_state_dict": scheduler.state_dict(),
+                    },
+                    "./last_checkpoint.pt",
+                )
+
             for batch_idx, (inputs, targets) in enumerate(trainloader):
                 inputs, targets = inputs.to(device), targets.to(device)
                 optimizer.zero_grad()
@@ -80,14 +107,16 @@ def loop(config=None):
 
                 wandb.log(
                     {
+                        "train/step": epoch * len(trainloader) + batch_idx + 1,
                         "train/loss": loss.item(),
                         "train/error %": 100.0 * (1 - correct / total),
-                        "train/batch_idx": batch_idx,
                     }
                 )
 
             net.eval()
             with torch.no_grad():
+                test_losses = []
+                test_errors = []
                 for batch_idx, (inputs, targets) in enumerate(testloader):
                     inputs, targets = inputs.to(device), targets.to(device)
                     outputs = net(inputs)
@@ -98,32 +127,31 @@ def loop(config=None):
                     total = targets.size(0)
                     correct = predicted.eq(targets).sum().item()
 
-                    wandb.log(
-                        {
-                            "test/loss": loss.item(),
-                            "test/error %": 100.0 * (1 - correct / total),
-                            "test/batch_idx": batch_idx,
-                        }
-                    )
+                    test_losses.append(loss.item())
+                    test_errors.append(100.0 * (1 - correct / total))
+                wandb.log({
+                    "test/step": epoch * len(testloader) + batch_idx + 1,
+                    "test/loss": sum(test_losses) / len(test_losses),
+                    "test/error %": sum(test_errors) / len(test_errors),
+                    "test/error std": torch.tensor(test_errors).std().item(),
+                    "test/error min": min(test_errors),
+                    "test/error max": max(test_errors),
+                })
+
+        os.remove("./last_checkpoint.pt")
 
 
-hyperparameter_lists = {
-    "epochs": {"value": 50},
-    "batch_size": {"value": 128},
-    "lr": {"value": 0.1},
-    "wd": {"value": 5e-4},
-    "hidden_dim": {"values": [10, 16, 22]},
-    "depth": {"values": [3, 6, 9]},
+hyperparameter_config = {
+    "epochs": 50,
+    "batch_size": 128,
+    "lr": 0.1, # subject to change as size increases
+    "wd": 5e-4,
 }
 
-sweep_configuration = {
-    "name": "Spaced out depth scaling",
-    "metric": {"name": "test/error %", "goal": "minimize"},
-    "method": "grid",
-    "parameters": hyperparameter_lists,
-}
+combos = [(35, 5, 2224995), (49, 7, 6174549), (63, 9, 13206007), (77, 11, 24208425), (91, 13, 40070859)] 
 
-sweep_id = wandb.sweep(sweep=sweep_configuration, project="resnet-scaling-laws")
-
-# run the sweep
-wandb.agent(sweep_id, function=loop)
+for w,d,s in combos: 
+    hyperparameter_config['hidden_dim'] = w
+    hyperparameter_config['depth'] = d
+    hyperparameter_config['size'] = s
+    loop(hyperparameter_config)
