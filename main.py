@@ -144,13 +144,14 @@ def loop(config=None):
 hyperparameter_config = {
     "epochs": 50,
     "batch_size": 128,
-    "lr": 0.1,
+    "lr": 0.1, # subject to change as size increases
     "wd": 5e-4,
-    "hidden_dim": 24,
-    "depth": 5
 }
 
-# for w,d in [(35, 7), (24, 5)]:
-#     hyperparameter_config['hidden_dim'] = w
-#     hyperparameter_config['depth'] = d
-loop(hyperparameter_config)
+combos = [(35, 5, 2224995), (49, 7, 6174549), (63, 9, 13206007), (77, 11, 24208425), (91, 13, 40070859)] 
+
+for w,d,s in combos: 
+    hyperparameter_config['hidden_dim'] = w
+    hyperparameter_config['depth'] = d
+    hyperparameter_config['size'] = s
+    loop(hyperparameter_config)
