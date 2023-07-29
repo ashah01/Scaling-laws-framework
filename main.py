@@ -76,20 +76,22 @@ def loop(config=None):
             scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
             epoch_subtract = checkpoint["epoch"] - 1
 
-        for epoch in range(wandb.config.epochs - epoch_subtract):
+        for epoch in range(wandb.config.epochs): # Skip epoch_subtract epochs
+            if epoch_subtract > 0:
+                epoch_subtract -= 1
+                continue
             net.train()
 
-            if (epoch + 1) % 5 == 0:
-                # checkpoint
-                torch.save(
-                    {
-                        "epoch": epoch + 1,
-                        "model_state_dict": net.state_dict(),
-                        "optimizer_state_dict": optimizer.state_dict(),
-                        "scheduler_state_dict": scheduler.state_dict(),
-                    },
-                    "./last_checkpoint.pt",
-                )
+            # checkpoint
+            torch.save(
+                {
+                    "epoch": epoch + 1,
+                    "model_state_dict": net.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "scheduler_state_dict": scheduler.state_dict(),
+                },
+                "./last_checkpoint.pt",
+            )
 
             for batch_idx, (inputs, targets) in enumerate(trainloader):
                 inputs, targets = inputs.to(device), targets.to(device)
@@ -148,9 +150,9 @@ hyperparameter_config = {
     "wd": 5e-4,
 }
 
-combos = [(35, 5, 2224995), (49, 7, 6174549), (63, 9, 13206007), (77, 11, 24208425), (91, 13, 40070859)] 
+combos = [(63, 9, 13206007), (77, 11, 24208425), (91, 13, 40070859)] # (35, 5, 2224995), (49, 7, 6174549), 
 
-for w,d,s in combos: 
+for w,d,s in combos:
     hyperparameter_config['hidden_dim'] = w
     hyperparameter_config['depth'] = d
     hyperparameter_config['size'] = s
